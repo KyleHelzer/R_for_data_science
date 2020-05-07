@@ -1627,3 +1627,11 @@ who3 <- who2 %>%
 who3 %>% 
   group_by(sex) %>% 
   count()
+
+who3 %>% 
+  group_by(country, year, sex)
+
+
+# CHAPTER 13 RELATIONAL DATA
+# Relational data means multiple tables of data. How do we combine data spanning multiple datasets?
+
