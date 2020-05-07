@@ -1,0 +1,1629 @@
+setwd("C:/Users/Kyle/Documents/R_practice/R_for_data_science/")
+setwd("/home/kyle/R_practice/R_for_data_science/")
+
+install.packages("ggplot2")
+install.packages("bindrcpp")
+install.packages("rlang")
+install.packages("plyr")
+install.packages("tidyverse")
+install.packages("maps")
+
+#needed to install Rtools35.exe from CRAN
+#https://cran.r-project.org/bin/windows/Rtools/
+
+#Ubuntu execute this line for dependencies:
+#sudo apt install libcurl4-openssl-dev libssl-dev libxml2-dev
+
+library(ggplot2)
+library(tidyverse)
+library(maps)
+
+#notes on http://vita.had.co.nz/papers/layered-grammar.pdf
+#1.INTRODUCTION
+  #develop a "grammar" for visualization and graphics
+  #based on "The Grammar of Graphics" (2005) Wilkinson, Anand, Grossman
+#2.HOW TO BUILD A PLOT
+  #variables can be mapped to aesthetics
+
+
+#3.3 Aesthetic Mappings
+
+# general formula
+# ggplot(data = <DATA>) +
+#  <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
+
+ggplot(data = mpg)
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = cty > 20))
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = hwy, y = cyl))
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = class, y = drv))
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = drv, y = cyl))
+
+#facet wrap
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_wrap(~ class, nrow = 3)
+
+#can add facet grid (ooooo fancy)
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ drv)
+
+#other geoms
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, color = drv)) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = drv))
+
+#makes same graph as above
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) +
+  geom_smooth(se = FALSE) + 
+  geom_point(show.legend = FALSE)
+
+ggplot(data = mpg, mapping = aes(x = hwy)) + 
+  geom_area(stat = "bin")
+
+ggplot(data = mpg, mapping = aes(x = hwy, y = cty)) + 
+  geom_point(mapping = aes(color = drv)) + 
+  geom_smooth()
+
+ggplot(data = mpg, mapping = aes(x = hwy, y = cty)) +
+  geom_text(aes(label = drv))
+
+#Exercise 3.7.1 (#6)
+#plot 1
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(size = 3) + 
+  geom_smooth(size = 2, se = FALSE)
+
+#plot 2
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(size = 3) + 
+  geom_smooth(mapping = aes(group = drv), size = 2, se = FALSE)
+
+#plot 3
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) +
+  geom_point(size = 3) + 
+  geom_smooth(size = 2, se = FALSE)
+
+#plot 4
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(color = drv), size = 3) +
+  geom_smooth(se = FALSE, size = 2)
+
+#plot 5
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(color = drv), size = 3) +
+  geom_smooth(mapping = aes(linetype = drv), se = FALSE, size = 2)
+
+#plot 6
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(size = 6, color = "white") + 
+  geom_point(mapping = aes(color = drv), size = 3)
+
+#3.7 Statistical Transformations
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut))
+
+ggplot(data = diamonds) +
+  geom_col(mapping = aes(x = cut, y = depth))
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, y = ..prop.., group = 1))
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, fill = cut), color = "#000000")
+
+#3.8 Position Adjustments
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, fill = clarity))
+
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) +
+  geom_bar(alpha = 0.2, position = "identity")
+
+ggplot(data = diamonds, mapping = aes(x = cut, color = clarity)) +
+  geom_bar(fill = NA, position = "identity")
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "fill")
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "dodge")
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy), position = "jitter")
+
+#3.8.1 Exercises
+#1
+#original plot
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+  geom_point()
+#revised plot
+#there are many overlapping points, so random noise helps view better
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+  geom_jitter()
+
+#2 - the argument <width> alters the amount of "jitter" or randomness in the points
+
+#3 - geom_jitter vs geom_count
+# geom_jitter moves the points around so they are visualized
+# geom_count alters the size of the point to represent the number of 
+# points on the same spot.
+# compare this graph with the one above
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+  geom_count()
+
+#4 - geom_boxplot
+# x must be categorical, y must be continuous
+ggplot(data = mpg, mapping =aes(x = class, y = cty)) +
+  geom_boxplot()
+
+#3.9 Coordinate Systems
+#coord_flip() switches x and y axis
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) +
+  geom_boxplot()
+
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) +
+  geom_boxplot() +
+  coord_flip()
+
+#map data
+nz <- map_data("nz")
+usa <- map_data("usa")
+states <- map_data("state")
+
+ggplot(nz, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill = "#FFFFFF", color = "#000000") + 
+  coord_quickmap()
+
+ggplot(usa, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill = "#FFFFFF", color = "#000000") +
+  coord_quickmap()
+
+arrests <- USArrests
+names(arrests) <- tolower(names(arrests))
+arrests$region <- tolower(rownames(USArrests))
+
+chono <- merge(states, arrests, sort = FALSE, by = "region")
+chono <- chono[order(chono$order),]
+
+ggplot(chono, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(group = group, fill =  assault)) +
+  coord_quickmap()
+
+#polar coordinates
+bar <- ggplot(data = diamonds) +
+  geom_bar(
+    mapping = aes(x = cut, fill = cut),
+    show.legend = FALSE,
+    width = 1
+  ) +
+  theme(aspect.ratio = 1) +
+  labs(x = NULL, y = NULL)
+
+bar + coord_flip()
+bar + coord_polar()
+
+#3.9.1 Exercises
+#1 - turn a stacked bar chart into a pie chart using coord_polar()
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = "", fill = cut), position = "stack") +
+  coord_polar(theta = "y")
+  
+#2 - labs() is the labels for the graph
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, fill = cut)) +
+  ggtitle("STUFF") +
+  xlab("this is the x axis") +
+  ylab("this is the y axis")
+
+#3 - coord_quickmap() vs. coord_map()
+nz <- map_data("nz")
+ggplot(data = nz, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill = "black", color = "red") +
+  coord_map()
+
+#4 - geom_abline(), default slope = 0 and default intercept = (0,0)
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+  geom_point() +
+  coord_fixed() +
+  geom_abline(slope = 1, intercept = 0)
+
+#chapter 5 - Data transformation
+# dplyr basics: 
+  # filter() picks observations by values
+  # arrange() reorders the rows
+  # select() chooses columns
+  # mutate()
+  # summarise()
+install.packages("nycflights13")
+library(nycflights13)
+library(tidyverse)
+
+filter(flights, month == 1, day ==1)
+filter(flights, dep_delay == -4)
+jan1 <- filter(flights, month == 1, day == 1)
+dec25 <- filter(flights, month == 12, day == 25)
+
+p <- ggplot(data = flights, aes(x = dep_delay, y = arr_delay))
+p + geom_point()
+
+# == vs. near()
+sqrt(2) ^ 2 == 2 #FALSE
+1 / 49 * 49 == 1 #FALSE
+near(sqrt(2) ^ 2, 2) #TRUE
+near(1/49 * 49, 1) #TRUE
+
+ggplot(data = flights, mapping = aes(x = carrier, y = dep_delay)) +
+  geom_boxplot()
+ggplot(data = flights, mapping = aes(x = dep_delay, y = arr_delay)) +
+  geom_point() +
+  geom_abline()
+
+nov_dec <- filter(flights, month == 11 | month == 12)
+#is the same as
+nov_dec <- filter(flights, month %in% c(11,12))
+nov_dec
+
+#if you want to know if a value is missing
+x <- NA
+is.na(x) #TRUE
+
+df <- tibble(x = c(1, NA, 3))
+filter(df, x > 1)
+filter(df, x > 1 | is.na(x))
+
+#5.2.4 Exercises
+?flights
+#1.1 arrival of 2 or more hours
+filter(flights, arr_delay >= 120)
+#1.2 flew to Houston (airport code IAH or HOU)
+filter(flights, dest == "IAH" | dest =="HOU")
+filter(flights, dest %in% c("IAH","HOU"))
+#1.3 Operated by United (UA), American (AA), or Delta (DL)
+filter(flights, carrier == "UA" | carrier == "AA" | carrier == "DL")
+filter(flights, carrier %in% c("UA","AA","DL"))
+#1.4 Departed in the summer (July, Aug, Sept) (7,8,9)
+filter(flights, month >= 7 & month <= 9)
+filter(flights, month %in% c(7,8,9))
+filter(flights, month == 7 | month == 8 | month == 9)
+filter(flights, between(month, 7, 9))
+#1.5 Arrived more than 2 hours late, but didn't leave late
+filter(flights, arr_delay >= 120 & dep_delay <= 0)
+#1.6 Were delayed by at least an hour, but made up over 30 min in flight
+filter(flights, dep_delay >= 60 & dep_delay - arr_delay >= 30)
+#1.7 Departed between midnight and 6am
+filter(flights, dep_time >= 0000 & dep_time <= 0600)
+?between
+filter(flights, between(dep_time, 0000, 0600))
+#2 - between, see altered answers above
+#3 How many flights have a missing dep_time? (is.na)
+filter(flights, is.na(dep_time))
+#4 Stuff on NA
+NA ^ 0 # 1, any value ^ 0 = 1
+NA * 0 # NA hmmm...
+NA | TRUE # TRUE, will always evaluate to TRUE
+TRUE | NA # TRUE, same as above 
+NA & FALSE # FALSE, will always evaluate to FALSE
+
+#5.3 arrange()
+?arrange() #arranges rows, default is ascending, NA is always at the end
+arrange(flights, year, month, day)
+# can set to descending with desc()
+arrange(flights, desc(dep_delay))
+#5.3.1 Exercises
+#1 Sort all missing values to top
+arrange(flights, desc(is.na(dep_delay)))#sorts alphabetically by TRUE/FALSE
+arrange(flights, !is.na(dep_delay))
+#2 most delayed flights
+arrange(flights, desc(dep_delay)) # most delayed
+arrange(flights, dep_delay) # left earliest
+#3 find the fastest flights
+arrange(flights, air_time)
+d <- select(flights, air_time, origin, dest, everything())
+arrange(d, air_time) #shortest flight
+t <- select(flights, distance, air_time, origin, dest, everything())
+arrange(t, desc(distance/air_time)) #fastest flight in speed
+#4 flights traveled the longest, shortest
+f <- select(flights, distance, air_time, origin, dest, everything())
+arrange(f, distance) #shortest --> newark to NYC(LGA)
+arrange(f, desc(distance)) #longest NYC(JFK) to HNL (Honolulu, HI)
+
+#5.4 select()
+#select these specific columns
+select(flights, year, month, day)
+#select all columns between year and day
+select(flights, year:day)
+#select all columns except for those between year and day
+select(flights, -(year:day))
+#useful commands:
+  #starts_with("abc"): matches name beginning with "abc"
+  #ends_with("xyz"): matches name ending with "xyz"
+  #contains("ijk"): matches names containing "ijk"
+  #matches("<regular expression>")
+  #num_range("x", 1:3) matches x1, x2, x3
+#rename() can remane variables
+  #in the format rename(data, NEW_NAME = OLD_NAME)
+p <- rename(flights, tail_num = tailnum)
+select(p, tail_num)
+p
+#5.4.1 Exercises
+#1 - how many ways to select dep_time, dep_delay, arr_time, arr_delay
+select(flights, dep_time, dep_delay, arr_time, arr_delay)
+select(flights, starts_with("dep"), starts_with("arr"))
+#2 - same variable multiple times in select()
+select(flights, month, month, month) #removes redundencies
+#3 - What does one_of() do?
+  #if variable is not in list, then it will still create the dataset, but
+  #simply give a warning
+vars <- c("year", "month", "day", "dep_delay", "arr_delay")
+vars_error <- c("year", "month", "day", "dep_delay", "arr_delay", "weight")
+select(flights, one_of(vars))
+select(flights, one_of(vars_error))
+?one_of
+#4 - does this result surprise you
+select(flights, contains("TIME"))
+#yes, I thought it would be case sensitive
+?contains() #can change default
+select(flights, contains("TIME", ignore.case = FALSE))
+
+#5.5 Add new variables with mutate()
+flights_sml <- select(flights, year:day, ends_with("delay"), distance, air_time)
+mutate(flights_sml,
+       gain = dep_delay - arr_delay,
+       speed = distance / air_time * 60,
+       hours = air_time / 60,
+       gain_per_hour = gain / hours #can reference variables just created
+) # need to store in new variable if want to keep, alternative, pipe to other things
+
+#transmute() only keeps new variables
+transmute(flights,
+          gain = dep_delay - arr_delay,
+          hours = air_time / 60,
+          gain_per_hour = gain / hours)
+
+#5.5.1 Useful creation functions to use with mutate()
+# function must be vectorized
+# arithmetic operations: + - * / ^
+# can also do sum() and mean() etc.
+# modular arithmetic %/% (integer division) and %% (remainder)
+# x == y * (x %/% y) + (x %% y)
+# x == y * integer_floor + remaider
+transmute(flights,
+          dep_time,
+          hour = dep_time %/% 100, # gives hour since this is in military time
+          minute = dep_time %% 100 # remaining minutes
+          )
+# logs() i.e. log(), log2(), log10()
+# offsets: lead() and lag()
+# cumulative and rolling aggregates
+x <- c(1:10)
+cumsum(x) #each value is the cumulative sum of the values
+cummean(x) # each value is the cumulative mean of the values
+#ranking
+  #min_rank() adds a column with the rank of the variable given
+  #default is low to high, to reverse, do min_rank(desc(y))
+
+#5.5.2 Exercises
+#1 - dep_time and sched_dep_time are hard to compute with. Convert to minutes since midnight
+x <- select(flights, dep_time, sched_dep_time)
+y <- mutate(x,
+       dt_from_mid = ((dep_time %/% 100)*60 + dep_time %% 60),
+       sdt_from_mid = ((sched_dep_time %/% 100)*60 + sched_dep_time %% 60)
+)
+#2 - compare air_time with arr_time - dep_time
+p <- select(flights, air_time, arr_time, dep_time)
+mutate (p,
+        at_from_mid = ((arr_time %/% 100)*60 + arr_time %% 60),
+        dt_from_mid = ((dep_time %/% 100)*60 + dep_time %% 60),
+        adj_total_time = at_from_mid - dt_from_mid,
+        wrong_total_time = arr_time - dep_time
+        )
+  # they are different because one is in time and the other is in military time, not an int
+  # need to change to min since midnight as in #1
+
+#3 - compare dep_time, sched_dep_time, and dep_delay. how are they related?
+p <- select(flights, dep_time, sched_dep_time, dep_delay)
+  #dep_delay = dep_time - sched_dep_time
+  #dep_delay should be the same as:
+  #mutate(flights, x = dep_time - sched_dep_time)
+q <- mutate(p, x = dep_time - sched_dep_time)
+  #needs to be changed to time, its not an int. same as problem #2
+
+#4 - find the 10 most delayed flights using a ranking function. How to handle ties?
+p <- select(flights, dep_delay, everything()) %>% arrange()
+p <- arrange(p, dep_delay)
+p
+
+flights %>%
+  select(dep_delay, everything()) %>%
+  arrange(dep_delay)
+
+#5 - what does 1:3 + 1:10 do?
+1:3 + 1:10
+  #takes the longer object (1:10) and addes the short object (1:3) across each element
+  #1 2 3 4 5 6 7  8  9 10 (1:10)
+  #1 2 3 1 2 3 1  2  3  1 (1:3)
+  #2 4 6 5 7 9 8 10 12 11 (result)
+
+#6 - what trig functions does R provide?
+  #sin(), cos(), tan(), sinh(), cosh(), tanh(), asin(), acos(), atan()
+
+# Chapter 5.6 - Grouped Summaries with summarize()
+
+flights %>%
+  summarise(delay = mean(dep_delay, na.rm = TRUE))
+
+p <- flights %>%
+  group_by(year, month, day) %>%
+  summarise(delay = mean(dep_delay, na.rm = TRUE),
+            stdev = sd(dep_delay, na.rm = TRUE))
+
+q <- ggplot(data = p, aes(x = day, y = delay)) +
+  geom_line() +
+  facet_wrap( ~ month) +
+  geom_errorbar(aes(ymin = delay - stdev, ymax = delay + stdev))
+
+#5.6.1 THE PIPE %>%
+#combine functions together to make more readable code
+#sidenote: ggvis is the next version of ggplot2 which uses the pipe
+
+
+delays <- flights %>%
+  group_by(dest) %>%
+  summarise(
+    count = n(),
+    dist = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)
+  ) %>%
+  filter(count > 20, dest != "HNL")
+  
+#5.6.2 Missing Values
+  #the na.rm = TRUE means remove missing values prior to computation
+
+not_cancelled <- flights %>%
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+
+not_cancelled %>% 
+  group_by(year, month, day) %>%
+  summarise(mean = mean(dep_delay))
+
+#5.6.3 Counts
+  #whenever an aggregation is done, its generally good to do a count using n()
+  #also do a count of non-missing values with sum(!is.na(x))
+
+delays <- not_cancelled %>%
+  group_by(tailnum) %>%
+  summarise(
+    count = n(),
+    delay = mean(arr_delay),
+    delay_sd = sd(arr_delay)
+  )
+
+ggplot(data = delays, mapping = aes(x = delay)) + 
+  geom_freqpoly(binwidth = 10)
+
+not_cancelled %>%
+  select(tailnum, arr_delay) %>%
+  group_by(tailnum) %>%
+  summarise(delaymean = mean(arr_delay),
+            n = n()) %>%
+  arrange(desc(delaymean))
+
+delays <- not_cancelled %>%
+  group_by(tailnum) %>%
+  summarise(
+    delay = mean(arr_delay, na.rm = TRUE),
+    n = n()
+  )
+
+ggplot(data = delays, mapping = aes(x = n, y = delay)) + 
+  geom_point(alpha = 0.1)
+
+delays %>%
+  filter(n > 25) %>%
+  ggplot(mapping = aes(x = n, y = delay)) + 
+    geom_point(alpha = 0.1)
+
+install.packages("Lahman")
+batting <- as_tibble(Lahman::Batting)
+
+batters <- batting %>%
+  group_by(playerID) %>%
+  summarise(
+    ba = sum(H, na.rm = TRUE) / sum(AB, na.rm = TRUE),
+    ab = sum(AB, na.rm = TRUE)
+  )
+
+batters %>%
+  filter(ab > 100) %>%
+  ggplot(mapping = aes(x = ab, y = ba)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+
+
+#5.6.4 Useful Summary Functions
+#measures of location:
+  # mean(), median()
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    avg_delay1 = mean(arr_delay),
+    avg_delay2 = mean(arr_delay[arr_delay > 0]) # average positive delay
+  )
+
+#measures of spread
+  # sd() = standard deviation
+  # IQR() = inter quartile range
+  # mad() = median absolute deviation
+
+not_cancelled %>% 
+  group_by(dest) %>% 
+  summarise(distance_sd = sd(distance),
+            n = n()) %>% 
+  arrange(desc(distance_sd))
+
+#measures of rank
+  # min()
+  # quartile(x, 0.25) will find a value of x > 25% of the values and less than the remaining 75%
+  # max()
+
+  #when do the first and last flights leave each day?
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    first = min(dep_time),
+    last = max(dep_time)
+  )
+
+#measures of position
+  # first()
+  # nth(x, 2) second value? works similar to x[2]
+  # last()
+
+  #find first and last departure for each day
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    first_dep = first(dep_time),
+    last_dep = last(dep_time)
+  )
+
+#counts
+  # n() takes no arguments and returns the size of the current group
+  # sum(!is.na(x)) counts the number of non-missing values
+  # n_distinct(x) counts the number of unique values
+
+  #which destinations had the most carriers?
+not_cancelled %>% 
+  group_by(dest) %>% 
+  summarise(carriers = n_distinct(carrier)) %>% 
+  arrange(desc(carriers))
+
+not_cancelled %>% 
+  count(dest)
+
+not_cancelled %>% 
+  count(tailnum) #flights flown by each tailnum (plane)
+
+not_cancelled %>% 
+  count(tailnum, wt = distance) #totals the distance for each tailnum (plane). wt = "weight"
+
+#can use boolean evals to count number of observasions that meet that criteria
+#sum(BOOLEAN) works because TRUE is evaluated as 1 and FALSE as 0
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(n_early = sum(dep_time < 500)) #how many flights leave before 5am?
+
+#What proportion of flights are delayed by more than an hour?
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(hour_delay = mean(arr_delay > 60)) #mean(boolean) is the same as proportion
+
+#5.6.5 GROUPING WITH MULTIPLE VARIABLES
+
+daily <- flights %>% 
+  group_by(year, month, day)
+(per_day <- summarise(daily, flights = n()))
+(per_month <- summarise(per_day, flights = sum(flights)))
+
+#5.6.6 UNGROUPING
+
+daily %>% 
+  ungroup() %>% 
+  summarise(flights = n())
+
+#5.6.7 EXERCISES
+not_cancelled <- flights %>% 
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+  #1 - Brainstorm 5 different ways to assess the following:
+  #A - flights arrives 15min early 50% of the time and 15min late the other 50%
+A <- not_cancelled %>% #fuck this problem
+  select(flight, arr_delay) %>% 
+  group_by(flight) %>% 
+  summarise(late_or_early = mean(arr_delay < -15 | arr_delay > 15)) %>% 
+  filter(late_or_early == 1)
+  
+  #B - A flight is always 10 min late
+B <- not_cancelled %>% 
+  select(flight, arr_delay) %>% 
+  group_by(flight) %>% 
+  summarise(
+    n = n(),
+    late10 = sum(arr_delay > 10)
+  ) %>% 
+  filter(late10 == n) %>% 
+  arrange(desc(n))
+B
+
+#flight 3585 is always > 10 min late. What is the route of the flight?
+flights %>% 
+  filter(flight == 3585) %>% 
+  select(year, month, day, origin, dest, carrier)
+  #route is JFK --> PHL
+  #all flights were in July/August
+
+  #C - find another way to to the following without count()
+not_cancelled %>% 
+  count(dest)
+
+not_cancelled %>% 
+  group_by(dest) %>% 
+  summarise(n = n())
+
+#3 - definition of cancelled flight is (is.na(dep_delay) | is.na(arr_delay)).
+  #why is this suboptimal? which is more important?
+  #arr_delay is more important because dep_delay flights can be rerouted to another
+    #airport or they can crash
+
+  #4 - is there a pattern to cancelled flights?
+flights %>% 
+  select(year, month, day, arr_delay) %>% 
+  filter(is.na(arr_delay)) %>% 
+  group_by(year, month, day) %>% 
+  summarise(n = n()) %>% 
+  ggplot(mapping = aes(x = day, y = n)) + 
+  geom_line() + 
+  facet_wrap( ~ month)
+
+#there is a spike in early february in flights not arriving. What about departures?
+
+flights %>% 
+  select(year, month, day, dep_delay) %>% 
+  filter(is.na(dep_delay)) %>% 
+  group_by(year, month, day) %>% 
+  summarise(n = n()) %>% 
+  ggplot(mapping = aes(x = day, y = n)) + 
+  geom_line() + 
+  facet_wrap( ~ month)
+
+#plot both? or plot difference in not arrived vs not left
+
+flights %>% 
+  select(year, month, day, dep_delay, arr_delay) %>% 
+  filter(is.na(dep_delay) | is.na(arr_delay)) %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    n_delayed = sum(is.na(dep_delay)),
+    n_not_arrived = sum(is.na(arr_delay)),
+    diff = n_not_arrived - n_delayed
+  ) %>% 
+  ggplot() + 
+  geom_line(mapping = aes(x = day, y = diff)) +
+  #geom_line(mapping = aes(x = day, y = n_delayed, color = "red")) + 
+  #geom_line(mapping = aes(x = day, y = n_not_arrived, color = "blue")) + 
+  facet_wrap( ~ month)
+
+
+cancelled <- flights %>% 
+  select(year, month, day, dep_delay, origin) %>% 
+  filter(month == 2, day == 8:9, is.na(dep_delay)) %>% 
+  group_by(origin) %>% 
+  summarise(n = n()) %>% 
+  arrange(desc(n))
+#  ggplot(mapping = aes(x = day, y = n)) + 
+ # geom_line() +
+  #facet_wrap( ~ month)
+cancelled
+
+#5 - which carrier had the worst delay?
+not_cancelled %>% 
+  select(carrier, dep_delay) %>% 
+  group_by(carrier) %>% 
+  summarise(
+    mean_delay = mean(dep_delay)
+  ) %>% 
+  arrange(desc(mean_delay))
+
+#which departing airports have the worst delay?
+not_cancelled %>% 
+  select(origin, dep_delay) %>% 
+  group_by(origin) %>% 
+  summarise(
+    mean_delay = mean(dep_delay)
+  ) %>% 
+  arrange(desc(mean_delay))
+
+#which destinations have worst arrival time?
+not_cancelled %>% 
+  select(dest, arr_delay) %>% 
+  group_by(dest) %>% 
+  summarise(
+    mean_arr_delay = mean(arr_delay)
+  ) %>% 
+  arrange(desc(mean_arr_delay))
+
+flights_sml <- flights %>% 
+  select(year:day,
+         ends_with("delay"),
+         distance,
+         air_time
+  ) %>% 
+  mutate(
+    gain = dep_delay - arr_delay,
+    speed = distance / air_time * 60
+  )
+
+#finds the fastest flights
+flights_sml %>% 
+  arrange(desc(speed))
+
+#5.7 GROUPED MUTATES (AND FILTERS)
+  #using group_by() with mutate() and filter()
+#find the worst members of each group
+#groups by year/month/day, then shows the top 10 for each group
+flights_sml %>% 
+  group_by(year, month, day) %>% 
+  filter(rank(desc(arr_delay)) < 10)
+
+# find all groups bigger than a certain threshold
+popular_dest <- flights %>% 
+  # select(dest, everything()) %>% 
+  group_by(dest) %>% 
+  filter(n() > 365)
+popular_dest
+
+# Standarize to compute per group metrics
+popular_dest %>% 
+  filter(arr_delay > 0) %>% 
+  mutate(prop_delay = arr_delay / sum(arr_delay)) %>%
+  select(year:day, dest, arr_delay, prop_delay)
+
+#5.7.1 EXERCISES
+  # 2 - Which tailnum had the worst on-time record?
+flights %>% 
+  filter(!is.na(tailnum), !is.na(dep_delay)) %>% 
+  group_by(carrier) %>%
+  summarise(
+    n = n(),
+    prop_late = sum(dep_delay > 0) / n,
+  ) %>% 
+  # arrange(desc(prop_late), desc(n)) %>% 
+  ggplot(mapping = aes(x = n, y = prop_late, label = carrier)) +
+  geom_point(mapping = aes(color = carrier)) +
+  geom_text(position = position_nudge(y = -0.05)) +
+  xlim(0,60000) + 
+  ylim(0,1.0)
+
+#WORST PLANE. SHAME. 16 flights all late
+flights %>% 
+  filter(tailnum == "N66808")
+
+  #3 - What time of day should you fly if you want to avoid delays?
+flights %>% 
+  filter(!is.na(dep_time), !is.na(dep_delay)) %>% 
+  mutate(dep_time_by_hour = dep_time %/% 100) %>% # bin to every hour
+  group_by(dep_time_by_hour) %>%
+  summarise(
+    n = n(),
+    prop_late = sum(dep_delay > 0) / n
+  ) %>% 
+  filter(n > 0) %>% 
+  ggplot(mapping = aes(x = dep_time_by_hour, y = prop_late)) + 
+  geom_line()
+
+flights %>% 
+  filter(dep_time %/% 100 == 4) %>% 
+  arrange(desc(dep_delay))
+
+  #4 for each dest, calculate the total min of delay
+flights %>% 
+  filter(!is.na(dep_delay), !is.na(dep_time)) %>% 
+  group_by(dest) %>% 
+  summarise(
+    n = n(),
+    total_delay = sum(dep_delay),
+    ave_delay = mean(dep_delay)
+  ) %>% 
+  arrange(desc(total_delay), n)
+
+  #6 - find oddly fast flights
+flights %>% 
+  filter(!is.na(dep_time), !is.na(dep_delay)) %>% 
+  mutate(
+    speed = distance / air_time * 60
+  ) %>% 
+  select(speed, origin, dest, distance, air_time) %>% 
+  arrange(desc(speed))
+
+flights %>% 
+  filter(dest == "ATL", origin == "LGA", !is.na(dep_time), !is.na(dep_delay)) %>% 
+  mutate(
+    speed = distance / air_time * 60
+  ) %>% 
+  select(speed, origin, dest, distance, air_time) %>% 
+  arrange(desc(speed))
+
+  #7 - find all destinations flown by 2 or more carriers
+flights %>% 
+  group_by(dest) %>% 
+  summarise(carriers = n_distinct(carrier)) %>% 
+  filter(carriers > 1) %>% 
+  arrange(desc(carriers))
+
+
+#CHAPTER 6 - WORKFLOW
+# ive already been doing this
+
+#CHAPTER 7 - EXPLORATORY DATA ANALYSIS
+#7.3.1 - Visualizing discributions
+#categorical variable:
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut))
+
+diamonds %>% 
+  count(cut)
+
+#continuous variable:
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = carat), binwidth = 0.5)
+
+diamonds %>% 
+  count(cut_width(carat, 0.5)) # this is what i was looking for in 5.7.1 Exercises
+
+  #always check multiple bins
+smaller <- diamonds %>% 
+  filter(carat < 3)
+ggplot(data = smaller, mapping = aes(x = carat)) +
+  geom_histogram(binwidth = 0.05)
+
+  #overlaying multiple histograms
+ggplot(data = smaller, mapping = aes(x = carat, color = cut)) + 
+  geom_freqpoly(binwidth = 0.01)
+
+diamonds %>% 
+  group_by(carat) %>% 
+  summarise(
+    n = n()
+  ) %>% 
+  arrange(desc(n))
+
+#7.3.2 Typical Values
+ggplot(data = faithful, mapping = aes(x = eruptions)) + 
+  geom_histogram(binwidth = 0.1)
+
+#7.3.3 Unusual Values
+  #look for outliers, may be error in data entry?
+ggplot(diamonds) + 
+  geom_histogram(mapping = aes(x = y), binwidth = 0.5)
+  #the only evidence that there is an outlier is the long x-axis (labeled "y")
+
+#shorted y-axis
+ggplot(diamonds) + 
+  geom_histogram(mapping = aes(x = y), binwidth = 0.5) + 
+  coord_cartesian(ylim = c(0,50))
+  # ylim(0,50) dont use this because it throws out values outside the limits
+
+diamonds %>% 
+  filter(y < 3 | y > 25) %>% 
+  select(price, x, y, z) %>% 
+  arrange(y)
+  # there are two outliers, one with y = 58.9 and another with y = 31.8
+  # also values at 0, error in data entry. Size in mm cannot be 0
+
+#7.3.4 Exercises
+  #1 - explore x y z in diamonds
+
+# x vs y
+diamonds %>% 
+  filter(x> 0, y > 0, z > 0, y < 25) %>%  #removes those outliers from before
+  ggplot(mapping = aes(x = x, y = y)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+
+# x vs z
+diamonds %>% 
+  filter(x> 0, y > 0, z > 0, y < 25, z < 25) %>%  #removes those outliers from before
+  ggplot(mapping = aes(x = x, y = z)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+
+# y vs z
+diamonds %>% 
+  filter(x> 0, y > 0, z > 0, y < 25, z < 25) %>%  #removes those outliers from before
+  ggplot(mapping = aes(x = y, y = z)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+
+diamonds %>% 
+  filter(z > 0) %>% 
+  arrange(z)
+
+#7.4 MISSING VALUES
+# what to do with missing/unusual values?
+# remove entire row?
+diamonds2 <- diamonds %>% 
+  filter(between(y, 3, 20)) #removes weird values
+
+# replace weird values with NA, as to preserve the other data
+diamonds2 <- diamonds %>% 
+  mutate(y = ifelse(y < 3 | y > 20, NA, y))
+  # ifelse has 3 arguments
+  # (boolean test, value if TRUE, value if FALSE)
+  # ggplot2 will warn you if NA values are removed. It does not plot them
+
+ggplot(data = diamonds2, mapping = aes(x = x, y = y)) + 
+  geom_point() 
+  # 9 rows removes for having missing values (NA)
+  # the warning can be suppressed with na.rm = TRUE
+ggplot(data = diamonds2, mapping = aes(x = x, y = y)) + 
+  geom_point(na.rm = TRUE)
+
+#compare scheduled dep times and non-cancelled times
+flights %>% 
+  mutate(
+    cancelled = is.na(dep_time),
+    sched_hour = sched_dep_time %/% 100,
+    sched_min = sched_dep_time %% 100,
+    sched_dep_time = sched_hour + sched_min / 60
+  ) %>% 
+    ggplot(mapping = aes(sched_dep_time)) + 
+    geom_freqpoly(mapping = aes(color = cancelled), binwidth = 0.25)
+
+#7.4.1 EXERCISES
+  #1 - what happens to missing values in histograms?
+  diamonds2 %>% 
+    ggplot(mapping = aes(x = y)) + 
+    geom_histogram(binwidth = 0.1)
+  # the rows with the NA values get removed
+  #2 - what does na.rm = TRUE do in mean() and sum()
+  # it removes the NA values before calculaing the mean or sum. Otherwise it 
+  # returns NA. Default assignment is na.rm = FALSE
+  
+#7.5 COVARIATION
+
+ggplot(data = diamonds, mapping = aes(x = price)) + 
+  geom_freqpoly(mapping = aes(color = cut), binwidth = 500)
+  # hard to see difference because overall counts differ. Need to normalize by n
+
+ggplot(data = diamonds, mapping = aes(x = price, y = ..density..)) + 
+  geom_freqpoly(mapping = aes(color = cut), binwidth = 500)
+  # fair diamonds appear to have the highest average price
+
+diamonds %>% 
+  group_by(cut) %>% 
+  summarise(
+    ave_price = mean(price)
+  )
+
+#try using a box plot
+ggplot(data = diamonds, mapping = aes(x = cut, y = price)) + 
+  geom_boxplot()
+
+#how does mileage vary across car classes
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) +
+  geom_boxplot()
+#reorder x-axis by median value of hwy by using reorder()
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) +
+  geom_boxplot(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy))
+#flip coordinates with coord_flip()
+ggplot(data = mpg) + # dont need to declare x and y twice. removed here
+  geom_boxplot(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy)) +
+  coord_flip()
+
+#7.5.1.1 EXERCISES
+#2 - what var is most important in predicting the price of a diamond?
+
+#builds a single observation for score and corellation
+build_obs <- function(
+  df = diamonds,
+  carat_w = runif(1, 0.8, 1),
+  depth_w = runif(1, 0, 0.1),
+  table_w = runif(1, 0, 0.1),
+  x_w = runif(1, 0, 0.3),
+  y_w = runif(1, 0, 0.3),
+  z_w = runif(1, 0, 0.3)
+){
+  tempdf <- mutate(df,
+         carat_new = carat * carat_w,
+         depth_new = depth * depth_w,
+         table_new = table * table_w,
+         x_new = x * x_w,
+         y_new = y * y_w,
+         z_new = z * z_w,
+         score = carat_new + depth_new + table_new + x_new + y_new + z_new
+         )
+  corellation <- cor(tempdf$score, tempdf$price)
+  output <- tibble(carat_w = carat_w,
+                   depth_w = depth_w,
+                   table_w = table_w,
+                   x_w = x_w,
+                   y_w = y_w,
+                   z_w = z_w,
+                   corellation = corellation)
+  return(output)
+}
+
+#build table
+for (i in c(1:10000)){
+  if (i == 1){
+    output <- build_obs()
+  } else {
+   x <- build_obs()
+   output <- full_join(output, x)
+  }
+}
+output
+
+#sort by highest corellation
+output %>% 
+  arrange(desc(corellation))
+
+#calculate mean weightings for corrlations above a certain threshold
+output %>% 
+  filter(corellation > 0.91) %>% 
+  summarise(
+    n = n(),
+    mean_carat = mean(carat_w),
+    mean_depth = mean(depth_w),
+    mean_table = mean(table_w),
+    mean_x = mean(x_w),
+    mean_y = mean(y_w),
+    mean_z = mean(z_w)
+  )
+
+#corrlations of individual values
+diamonds %>% 
+  select(carat, depth, table, price, x, y, z) %>% 
+  cor()
+
+#calculate cor. coeff. for data score as is (all weights == 1)
+diamonds %>% 
+  mutate(
+    score = carat + depth + table + x + y + z
+  ) %>% 
+  select(score, price) %>% 
+  cor() #0.7451318
+
+#build histogram of corellation coefficients
+output %>% 
+  ggplot(mapping = aes(x = corellation)) + 
+  geom_histogram(binwidth = 0.0001)
+
+#5 - compare and contrast geom_violin() with geom_histogram, geom_freqpoly()
+diamonds %>% 
+  group_by(cut) %>% 
+  ggplot(mapping = aes(x = cut, y = carat)) + 
+  geom_violin(mapping = aes(color = cut, fill = cut), show.legend = FALSE) + 
+  geom_boxplot(mapping = aes(alpha = 0.3), show.legend = FALSE) + 
+  theme(
+    panel.background = element_blank(),
+    axis.line = element_line(color = "#000000"),
+  )
+
+#7.5.2 TWO CATEGORICAL VARIABLES
+ggplot(data = diamonds) +
+  geom_count(mapping = aes(x = cut, y = color))
+
+diamonds %>% 
+  count(color, cut) %>% 
+  ggplot(mapping = aes(x = color, y = cut)) + 
+  geom_tile(mapping = aes(fill = n))
+
+#7.5.3 TWO CONTINUOUS VARIABLES
+diamonds %>% 
+  ggplot() +
+  geom_point(mapping = aes(x = carat, y = price), alpha = 0.1)
+
+diamonds %>% 
+  ggplot() + 
+  geom_bin2d(mapping = aes(x = carat, y = price))
+
+#hex plot
+install.packages("hexbin")
+library("hexbin")
+diamonds %>% 
+  ggplot() +
+  geom_hex(mapping = aes(x = carat, y = price))
+
+#bin one var so it acts like a categorical var
+ggplot(data = smaller, mapping = aes(x = carat, y = price)) + 
+  geom_boxplot(mapping = aes(group = cut_width(carat, 0.1)))
+
+#7.6 PATTERNS AND MODELS
+  # spot a pattern:
+  # ask:
+  # due to coincidence?
+  # what relationship is implyed?
+  # how strong is the relationship?
+  # what other variable affect relationship?
+  # does relationship change when looking at different subgroups?
+
+ggplot(data = faithful) +
+  geom_point(mapping = aes(eruptions, y = waiting))
+
+library("modelr")
+# lm() - linear model function
+mod <- lm(log(price) ~ log(carat), data = diamonds)
+
+diamonds2 <- diamonds %>% 
+  add_residuals(mod) %>% 
+  mutate(resid = exp(resid))
+
+ggplot(data = diamonds2) +
+  geom_point(mapping = aes(x = carat, y = resid))
+
+ggplot(data = diamonds2) + 
+  geom_boxplot(mapping = aes(x = cut, y = resid))
+
+# 7.7 GGPLOT CALLS
+# do less typing. dont need "data =" or "mapping =" or x/y = ...
+ggplot(data = faithful, mapping = aes(x = eruptions)) + 
+  geom_freqpoly(binwidth = 0.25)
+#can be rewritten as:
+ggplot(faithful, aes(eruptions)) + 
+  geom_freqpoly(binwidth = 0.25)
+# can pipe data from dplyr stuff into ggplot
+diamonds %>% 
+  count(cut, clarity) %>% 
+  ggplot(aes(clarity, cut, fill = n)) + 
+    geom_tile()
+
+#8 - WORKFLOW: PROJECTS
+# highly recommended to not save .RData workspace between sessions
+# forces you to write down everything in the to the editor and save the file
+# trick to make sure captured important parts in the code:
+  # Ctrl + Shift + F10 = restarts RStudio
+  # Ctrl + Shift + S = reruns entire script
+
+#--------------------WRANGLE--------------------------------
+
+#10 - TIBBLES
+vignette("tibble") #might be a good read
+#coerce a data frame to a tibble with as_tibble()
+as_tibble(iris)
+#create new tibble with tibble()
+#it will recycle vars of length 1, and extend the all the way down the column
+#does not convert strings to factors
+tibble(
+  x = 1:5,
+  y = 1,
+  z = x^2 + y
+)
+#for variables that dont start with letters (i.e. number, or special char)
+#surround in backticks ``
+tb <- tibble(
+  `:)` = "smile",
+  ` ` = "space",
+  `2000` = "number",
+  x = 1:5
+)
+tb
+
+#another way do create a tibble is with transposed tibble - tribble()
+#basically tibble is typed out as a table with comma separaters
+tribble(
+  ~x, ~y, ~z,
+  #--/--/---- denotes where header is, personal style of H.W.
+  "a", 2, 3.6,
+  "b", 1, 8.5
+)
+
+#10.3 - Tibbles vs data.frame
+#printing
+#tibbles only show the first 10 rows and as many columns as can fit in the display
+#if you want more lines, print(n = 20) prints 20 rows, etc.
+#if you want all columns to be displayed, set
+# width = Inf
+nycflights13::flights %>% 
+  print(n = 10, width = Inf)
+
+#10.3.2 - SUBSETTING
+df <- tibble(
+  x = runif(5),
+  y = rnorm(5)
+)
+
+#extract by name
+df$x #get column x
+df[["x"]] #get column x
+#extract by position
+df[[1]] #get column 1
+
+# to pipe with, need the placeholder '.'
+df %>% 
+  .$x
+
+#to coerse tibble back to data.frame use as.data.frame()
+
+#10.5 EXERCISES
+#1 - how do you tell if an object is a tibble? Try printing mtcars
+#formatting is different
+mtcars
+print(mtcars)
+as_tibble(mtcars)
+
+#2 - compare and contrast data.frame operations
+df <- data.frame(abc = 1, xyz = "a")
+df$x #returns column xyz
+df[,"xyz"] #retruns column xyz
+df[, c("abc","xyz")] #returns both columns
+  #why is that comma there?
+
+#3 - if a variable has the name of an obiect in a tibble, how to extract
+var <- "mpg"
+df <- tibble(mtcars)
+df$var #does not work
+df[[var]] #this works because it needs quotes normally
+
+#4 - do the following in this annoying data frame (tibble)
+annoying <- tibble(
+  `1` = 1:10,
+  `2` = `1` * 2 + rnorm(length(`1`))
+)
+annoying
+  #extract the variable `1`
+annoying$`1`
+  #scatterplot of `1` vs `2`
+annoying %>% 
+  ggplot(aes(`1`,`2`)) +
+  geom_point()
+  #create new column 3 which is 2 divided by 1
+annoying2 <- annoying %>% 
+  mutate(
+    `3` = `2` / 1
+  )
+  #rename columns to one, two, three
+annoying2 %>% 
+  rename(one = `1`, two = `2`, three = `3`)
+
+#5 - what does tibble::enframe() do?
+tibble::enframe(c(a = 5, b = 7))
+enframe(list(one = 1, two = 2:3, three = 4:6))
+
+#---------------------------------------------------------
+#11 - DATA IMPORT
+#reading in data with readr (part of tidyverse)
+read_csv() #reads in comma delimited files
+read_csv2() #reads in semicolon separated files (common in countries where , is decimal)
+read_tsv() #reads in tab delimited files
+read_delim() #reads in with any delimiter
+read_fwf() #reads fixed width files
+read_log #reads Apache style log files
+
+#first argument is filepath
+#can also enter inline csv file:
+read_csv(
+  "a,b,c
+  1,2,3
+  4,5,6"
+)
+
+#if the first n rows are comments, can skip those lines with skip = n
+read_csv("The first line of metadata
+         the second line of metatdata
+         x,y,z
+         1,2,3
+         4,5,6", skip = 2)
+
+#can also define what lines to skip be comment char
+read_csv("# comment 1
+         # comment 2
+         # blahblahblah
+         x,y,z
+         1,2,3", comment = "#")
+read_csv("# A comment I want to skip
+         another comment
+         x,y,z
+         1,2,3", comment = "#")
+
+#if columns have no names, set col_names = FALSE
+read_csv("1,2,3\n4,5,6", col_names = FALSE)
+#col_names can also be passed a vector to use as the names 
+read_csv("1,2,3\n4,5,6", col_names = c("x", "y", "z"))
+
+# na = spcifies the char used for NA values
+read_csv("a,b,c\n1,2,.", na = ".")
+
+#11.2.2 EXERCISES
+#1 - what to use to read in file delimited with |
+read_delim("a|b|c\n1|2|3", delim = "|")
+read_fwf()
+
+#11.3 PARSING A VECTOR
+#purpose is to read in a character vector and return a different vector (int, dbl, date)
+#some of the parse_*() functions:
+parse_logical()
+parse_integer()
+parse_date()
+parse_character()
+parse_factor()
+
+str(parse_integer(c("1","2","3")))
+
+#first argument is the character vector to parse
+#na argument says which strings should be treated as missing or NA
+parse_integer(c("1","2","3","."), na = ".")
+
+#failed parsing returns a warning
+x <- parse_integer(c("123","456","abc","123.45"))
+#failed values will be NA
+#can analyze failed parsed values with problems()
+problems(x) #returns a tibble, which can be played with to determine why vals missing
+
+#11.3.1 NUMBERS (as in parsing numbers)
+#sometimes people write numbers differently in different parts of the world
+#i.e. "." vs "," for a decimal
+#sometimes numbers are surrounded by special character ($, %, currency symbols)
+#the can contian grouping chars (i.e 1,000,000 instead of 1000000)
+
+# . vs ,
+parse_double("1.23")
+parse_double("1,23", locale = locale(decimal_mark = ","))
+
+# special chars
+parse_number("$100") #100
+parse_number("20%") #20
+parse_number("It cost $123.45") #123.45, ignores non-numeric chars before and after num
+
+# grouping marks
+parse_number("$123,456,789") #123456789
+parse_number("123.456.789", locale = locale(grouping_mark = ".")) #123456789
+parse_number("123'456'789", locale = locale(grouping_mark = "'")) #123456789
+
+#11.3.2 STRINGS (parsing strings)
+#not really straight forward.
+#look at raw hex values for char with charToRaw()
+charToRaw("Hadley")
+#rear default encoding is UTF-8
+#some data cannot be understood by UTF-8
+x1 <- "El Ni\xf1o was particularly bad this year"
+x1
+parse_character(x1, locale = locale(encoding = "Latin1"))
+#usually encoding is in the documentation, but what if you can't find it?
+#use guess_encoding()
+guess_encoding(charToRaw(x1))
+normal <- "this is a normal sentence"
+guess_encoding(charToRaw(normal))
+
+#a FACTOR is a set of categorical variables that has a known set of possible values
+fruit <- c("apple", "banana")
+parse_factor(c("apple", "banana", "banananana"), levels = fruit)
+#banananana is not in fruit, so it throws an error
+
+#11.3.4 DATES and DATE-TIMES and TIMES
+#parse_datetime() expects ISO-8601
+parse_datetime("2010-10-01T2010")
+parse_datetime("20101010") # if no time, time is set to midnight
+parse_datetime("2010-10-10")
+
+#parse_date() expects 4 digit year [- or /], month, [- or /], then day
+parse_date("2010-10-01")
+
+#parse_time() expects hour : minute : second (optionally) am/pm (optionally)
+library(hms)
+parse_time("01:10 am")
+parse_time("2:45 pm")
+parse_time("20:10:00")
+
+#format can be supplied
+parse_date("01/02/15", "%m/%d/%y") #January, 2nd 2015
+parse_date("01/02/15", "%d/%m/%y") #February, 1st 2015
+parse_date("01/02/15", "%y/%m/%d") #February 15th, 2001
+
+# %Y = 4 digit year (2010)
+# %y = 2 digit year (00 - 69 = 2000 to 2069; 70-99 = 1970 - 1999)
+# %m = 2 digit month
+# %b = abbev. name Jan, Feb, Mar, ...
+# %B = full name January, February, ... can also be used with other languages
+# %d = 2 digit day
+# %e = optional leading space
+# %H = hour (military time)
+# %I = 0-12 hour, needs to be used with %p
+# %p = AM/PM indicator
+# %M = minutes
+# %S = integer seconds
+# %OS = real seconds
+# %Z = Time Zone
+# %z = offset from UTC, e.g. +0800
+# %. = skips one non-digit char
+# %* = skips any number of non-digits
+
+
+#11.3.5 EXERCISES
+#1 - most important arguments to locale()?
+?locale()
+  #decimal_mark = 
+  #grouping_mark = 
+  #encoding = 
+
+#2 - what happens if decimal_mark = grouping_mark?
+parse_number("123,123,123,123", locale = locale(grouping_mark = ",", decimal_mark = ","))
+#throws error if decimal_mark and grouping_mark are different
+
+#3 - what do options date_format and time_format do in locale()?
+
+#5 - read_csv() reads comma sep variables, read_csv2() reads semicolon sep variables
+
+#6 - most common encodings in EU? Asia?
+  #Europe - ISO-8859 / ISO-8859-1
+
+#7 - parse the following date times
+d1 <- "January 1, 2010"
+parse_date(d1, format = "%B %d, %Y")
+d2 <- "2015-Mar-07"
+parse_date(d2, format = "%Y-%b-%d")
+d3 <- "06-Jun-2017"
+parse_date(d3, format = "%d-%b-%Y")
+d4 <- c("August 19 (2015)", "July 1 (2015)")
+parse_date(d4, format = "%B %d (%Y)")
+d5 <- "12/30/14" # Dec 30, 2014
+parse_date(d5, format = "%m/%d/%y")
+t1 <- "1705"
+parse_time(t1, format = "%H%M")
+t2 <- "11:15:10.12 PM"
+parse_time(t2, format = "%I:%M:%OS %p")
+
+#11.4.1 PARSING STRATEGY
+#guess_parser() if you don't know which parser to use
+guess_parser("2010-10-10") # date
+guess_parser("15:01") # time
+guess_parser(c(TRUE, FALSE)) # logical
+guess_parser(c("1","5","6")) # double
+guess_parser(c("2,234,234")) # number
+
+challenge <- read_csv(
+  readr_example("challenge.csv"),
+  col_types = cols(
+    x = col_double(),
+    y = col_date()
+  )
+)
+
+challenge
+
+# every parse_*() function has a corresponding col_*() function
+# parse_*() is used when the data is a character vector
+# col_*() is used when you want to tell readr how to load the data
+# I assume all of the 
+
+#11.5 WRITING TO FILE
+# ALWAYS ENCODE STRINGS IN UTF-8
+# ALWAYS SAVE DATES AS ISO-8061 (YYYY-MM-DD)
+
+# use write_excel_csv() if exporting to Excel csv.
+# It writes a special char at the begninng to tell it its in UTF-8
+
+write_csv(challenge, "challenge.csv") # data.frame to save, filepath
+
+# if written then read back in, it loses any pasrsing designations that were modified
+
+# to get around this, use write_rds() and read_rds()
+
+write_rds(challenge, "challenge.rds")
+read_rds("challenge.rds")
+
+readxl() #reads in .xls and .xlsx files
+
+#-------------------------------------------------------------------
+#CHAPTER 12 - TIDY DATA
+
+# 3 rules make a tidy dataset
+  # 1 - each variable must have its own column
+  # 2 - each observation must have its own row
+  # 3 - each value must have its own cell
+
+# how to fix a variable spread across multiple columns,
+# or an observation spread across multiple rows
+# using pivot_longer()
+# and pivot_wider()
+
+table4a <- tribble(
+  ~country, ~`1999`, ~`2000`,
+  "Afghanistan", 745, 2666,
+  "Brazil", 37737, 80488,
+  "China", 212258, 213766
+)
+table4a %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
+
+#Tidy the tibble below
+preg <- tribble(
+  ~pregnant, ~male, ~female,
+  "yes", NA, 10,
+  "no", 20, 12
+)
+
+preg %>% 
+  pivot_longer(
+             cols = c(male, female), 
+             names_to = "gender", 
+             values_to = "count",
+             values_drop_na = TRUE)
+
+#12.4.1 SEPARATE
+# how to separate one column into multiple columns
+table3 <- tribble(
+  ~country, ~year, ~rate,
+  "Afg", 1999, "765/123456",
+  "Afg", 2000, "2666/3729758",
+  "Bra", 1999, "37737/34567245",
+  "Bra", 2000, "80488/5434454",
+  "Chn", 1999, "211211/399543049",
+  "Chn", 2000, "455434/562465434"
+)
+
+table3 %>% 
+  separate(rate, into = c("cases", "population"), sep = "/", convert = TRUE)
+
+table5 <- table3 %>% 
+  separate(year, into = c("century", "year"), sep = 1, convert = TRUE)
+
+#12.4.2 UNITE
+# the opposite of separate()
+
+table5
+table5 %>% 
+  unite(new_var, country, year, sep = "")
+
+#12.5 MISSING VALUES
+
+# explicit vs implicit missing values
+# explicit is in the data as NA
+# implicit is not in the data at all
+
+# the function complete() is useful for making implicit missing values explicit
+
+# sometimes a NA means the previous value. for example:
+treatment <- tribble(
+  ~person, ~treatment, ~response,
+  "Kyle", 1, 7,
+  NA, 2, 10,
+  NA, 3, 9,
+  "Anna", 1, 4
+)
+
+treatment %>% 
+  fill(person) #fills NA values with value above it.
+
+#12.6 CASE STUDY
+
+who #dataset of TB cases broken down by year, county, age, gender, diagnoso method
+
+who2 <- who %>% 
+  pivot_longer(
+    cols = c(-country, -iso2, -iso3, -year),
+    names_to = "key",
+    values_to = "cases",
+    values_drop_na = TRUE
+  )
+
+
+who3 <- who2 %>% 
+  mutate(names_from = stringr::str_replace(key, "newrel", "new_rel")) %>% 
+  separate(key, c("new", "type", "sexage"), sep = "_") %>% 
+  separate(sexage, c("sex", "agegroup"), sep = 1) %>% 
+  select(-new, -iso2, -iso3)
+
+who3 %>% 
+  group_by(sex) %>% 
+  count()
