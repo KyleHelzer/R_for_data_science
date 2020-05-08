@@ -1634,4 +1634,27 @@ who3 %>%
 
 # CHAPTER 13 RELATIONAL DATA
 # Relational data means multiple tables of data. How do we combine data spanning multiple datasets?
+# Relations are always defined as a pair of tables
 
+# Three families of "verbs"
+# Mutating joins
+  # add new variable from one data frame from a matching observation from another
+# Filtering joins
+  # filter observations in one data frame based on the data in another data frame
+# Set operations
+  # treat observations as if they were set elements (What does this mean?)
+
+# RDBMS = Relational DataBase Management System
+
+# Explore the nycflights13 dataset
+
+library(tidyverse)
+library(nycflights13)
+# nycflights contains 4 tibbles related to flights:
+airlines # defines the airlines from the 2-letter idendifiers in `flights`
+airports # contains data for airports by 3-digit FAA name (name, lat, lon, altitude, timezone)
+planes # info about each plane identified in flights$tailnum
+weather # weather at each NYC airport for each hour for the whole year :O
+
+weather %>% 
+  arrange(desc(wind_speed))
