@@ -1658,3 +1658,86 @@ weather # weather at each NYC airport for each hour for the whole year :O
 
 weather %>% 
   arrange(desc(wind_speed))
+
+#13.2.1 Exercises
+#1 - How to draw routes between each origin and dest? What vars needed? 
+    # airport locations (lat, lon), origin, dest
+#2 - what is the relationship between weather and airports? in diagram?
+    # arrow from origin to faa
+#3 - this would contain a relationship between dest. Probably have a variable
+    # called "location" rather than "origin"
+#4 - data frame of special days. Year, month, day, holiday(?)
+
+#13.3 KEYS
+# Primary Keys
+    # uniquely identifies an object in its own table
+    # planes$tailnum = identifies each plane in the planes table
+planes %>% 
+  count(tailnum) %>% 
+  filter(n > 1) # this returns a list of 0 because each tailnum identifies 1 observation
+
+# Foreign Keys
+    # uniquely identifies an observation in another table. Flights$tailnum.
+    # multiple flights can have the same tailnum. Tailnum alone does not identify a single observation
+    # 
+flights %>% 
+  count(tailnum) %>% 
+  filter(n > 1) # this returns a table with many rows, because multiple flights can have the same tailnum
+
+# How to get the primary keys for weather?
+weather %>% 
+  count(year, month, day, hour, origin) %>% 
+  filter(n > 1) # this surprisingly is not unique. There are 3 observations which have the same of the variables
+
+# what is the primary key in the flights table?
+flights %>% 
+  filter(!is.na(dep_time)) %>% 
+  count(year, month, day, dep_time, tailnum) %>% 
+  filter(n > 1)
+
+# sometimes its useful to add a surrogate key by performing
+id_flights <- flights %>%
+  arrange(year, month, day, sched_dep_time, tailnum) %>% 
+  mutate(
+    id = row_number()
+  )
+
+#13.3.1 Exercises
+#1 - add a suggogate key to flights (already did above in id_flights)
+#2 - identify keys in the following datasets:
+
+Lahman::Batting %>% glimpse()
+Lahman::Batting %>% 
+  count(playerID, yearID, stint, teamID) %>% 
+  filter(n > 1)
+  #reason: players play over multiple years, can play for different teams in one year, can play for the same team "twice" in the same year (stint)
+
+install.packages("babynames")
+babynames::babynames %>% glimpse() # 1924655 observations
+babynames::babynames %>% 
+  count(name, year, sex) %>% 
+  filter(n > 1)
+
+install.packages("nasaweather")
+nasaweather::atmos %>% glimpse() # 41472 observations
+nasaweather::atmos %>% 
+  count(lat, long, year, month) %>% 
+  filter(n > 1)
+
+install.packages("fueleconomy")
+fueleconomy::vehicles %>% glimpse() # 33442 observations
+fueleconomy::vehicles %>% 
+  count(id) %>% 
+  filter(n > 1) # already has id number
+
+diamonds %>% glimpse()
+# for this, I dont think there is a primary key, we have to add one
+diamonds3 <- diamonds %>% 
+  mutate(
+    id = row_number()
+  )
+diamonds3
+
+#13.4 Mutating Joins
+# how to combine data from two tables
+# join based on key, which is why primary keys are so important
