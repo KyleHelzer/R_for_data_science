@@ -1741,3 +1741,259 @@ diamonds3
 #13.4 Mutating Joins
 # how to combine data from two tables
 # join based on key, which is why primary keys are so important
+
+# first matches observations by their key
+# then copies across variables from one tabel to the other
+
+# the join() functions add variables to the right, just like mutate()
+
+library(nycflights13)
+# simple dataset for practice
+flights2 <- flights %>%
+  select(year:day, hour, origin, dest, tailnum, carrier)
+flights2
+
+# add full airline name to flights2
+# data is in airlines
+airlines
+flights2 %>% 
+  select(-origin, -dest) %>% 
+  left_join(airlines, by = "carrier")
+
+# could have also performed like this:
+flights2 %>% 
+  select(-origin, -dest) %>% 
+  mutate(
+    name = airlines$name[match(carrier, airlines$carrier)] # harder to interpret
+  )
+
+# 13.4.1 Understanding Joins
+# example tibbles
+x <- tribble(
+  ~key, ~val_x,
+  1, "x1",
+  2, "x2",
+  3, "x3"
+)
+
+y <- tribble(
+  ~key, ~val_y,
+  1, "y1",
+  2, "y2",
+  4, "y3"
+)
+
+# a join is a way of connecting each row in x to 0, 1, or many rows in y
+
+# 13.4.2 Inner Join
+# the simples join in the inner join
+# matches pairs of observations when the keys are equal ==
+
+# unmatched rows are not included in the result
+# usually not appropriate for use in analysis because its easy to lose observations
+x %>% 
+  inner_join(y, by = "key")
+
+# 13.4.3 Outer Joins
+# includes left_join(), right_join(), and full_join()
+
+# left_join() keeps all observations in x
+# right_join() keeps all observations in y
+# full_join() keeps all observations in both x and y
+# if 
+
+# default join is the left_join().
+# you want to add additional data from another table, and want to keep all original observations
+
+x %>% 
+  left_join(y, by = "key")
+
+x %>% 
+  right_join(y, by = "key")
+
+x %>% 
+  full_join(y, by = "key")
+
+flights2 %>% 
+  left_join(airlines, by = "carrier")
+
+# 13.4.4 Duplicate Keys
+# sometimes tables will have duplicate keys
+
+# x has two keys for the number 2
+x <- tribble(
+  ~key, ~val_x,
+  1, "x1",
+  2, "x2",
+  2, "x3",
+  4, "x4"
+)
+
+y <- tribble(
+  ~key, ~val_y,
+  1, "y1",
+  2, "y2",
+  )
+
+# simply adds the value of val_y to x based on the value of val_x
+left_join(x, y, by = "key")
+
+# what if both tables have duplicate keys?
+x <- tribble(
+  ~key, ~val_x,
+  1, "x1",
+  2, "x2",
+  2, "x3",
+  4, "x4"
+)
+
+y <- tribble(
+  ~key, ~val_y,
+  1, "y1",
+  2, "y2",
+  2, "y3",
+  4, "y4"
+)
+
+# gives all possible combinations
+left_join(x, y, by = "key")
+
+# 13.4.5 Defining the Key Columns
+# using other variable encoded for "by = "
+
+# the default by = NULL uses all variable that appear in both tables
+# here is uses year, month, day, hour, origin
+# called a "natural join"
+flights2 %>% 
+  left_join(weather)
+
+# using a character vector
+# flights and planes have a variable called year, but they mean different things
+# so by = NULL would not be appropriate here
+flights2 %>% 
+  left_join(planes, by = "tailnum")
+# if there are common variables, it adds a .<tablename> to the common var
+# see the year variable. it is year.x and year.y
+
+# if the common variables don't have the same name
+# flights$dest can be matched with airports$faa
+flights2 %>% 
+  left_join(airports, by = c("dest" = "faa"))
+
+flights2 %>% 
+  left_join(airports, by = c("origin" = "faa"))
+
+# 13.4.6 Exercises
+#1 - compute the average delay by destination the join on the airports data frame
+
+mean_delay_by_dest <- flights %>% 
+  group_by(dest) %>% 
+  summarise(
+    ave_delay = mean(arr_delay, na.rm = TRUE)
+  )
+
+# adds airport data to modified flights table
+mean_delay_by_dest %>% #modified from flights
+  left_join(airports, by = c(dest = "faa"))
+
+# adds mean_delay_by_dest data to airports
+# all airport codes are represented here, so many airports will not have ave_delay
+# because they dont receieve flights from NYC
+airports %>% 
+  left_join(mean_delay_by_dest, by = c(faa = "dest"))
+
+
+mean_delay_by_dest %>% 
+  left_join(airports, by = c(dest = "faa")) %>% 
+  ggplot(aes(lon, lat)) +
+  borders("state") +
+  geom_point(aes(color = ave_delay)) +
+  scale_color_gradient(low = "green", high = "red") +
+  coord_quickmap()
+
+airports %>% 
+  semi_join(mean_delay_by_dest, c("faa" = "dest")) %>% 
+  ggplot(aes(lon, lat)) +
+  borders("state") +
+  geom_point() +
+  coord_quickmap()
+
+airports %>% 
+  semi_join(flights, c("faa" = "dest")) %>% 
+  ggplot(aes(lon, lat)) +
+  borders("state") +
+  geom_point() + 
+  coord_quickmap()
+
+#2 - add location (lat, lon) for origin and dest for flights
+
+airport_locations <- airports %>% 
+  select(faa, lat, lon)
+
+flights %>% 
+  left_join(airport_locations, by = c(dest = "faa")) %>% 
+  left_join(airport_locations, by = c(origin = "faa")) %>% 
+  mutate(
+    test = sqrt((lat.x - lat.y)^2 + (lon.x - lon.y)^2)
+  ) %>% 
+  print(width = Inf)
+
+#3 - is there a relationship between the age of a plane and its delay
+
+plane_ages <- planes %>% 
+  select(tailnum, year)
+
+flights %>% 
+  left_join(plane_ages, by = "tailnum") %>%
+  # group_by(year.y) %>% 
+  # summarise(
+  #   mean_delay_by_plane_age = mean(arr_delay, na.rm = TRUE)
+  # ) %>% 
+  ggplot(aes(year.y, arr_delay, group = year.y)) + 
+  geom_boxplot(outlier.alpha = 0.1)
+
+#4 - what weather conditions make it more likely to see a delay?
+weather
+# precip vs dep_delay
+flights %>% 
+  left_join(weather, by = "time_hour") %>% 
+  group_by(precip) %>% 
+  summarise(
+    delay = mean(dep_delay, na.rm = TRUE),
+    n = n()
+  ) %>% 
+  print(n = 60)
+# ggplot(aes(precip, delay)) + 
+  # geom_point()
+
+# wind_dir vs arr_delay
+flights %>% 
+  left_join(weather, by = "time_hour") %>% 
+  ggplot(aes(wind_dir, arr_delay)) + 
+  geom_point()
+
+# temp vs dep_delay
+flights %>% 
+  left_join(weather, by = "time_hour") %>% 
+  ggplot(aes(temp, dep_delay)) + 
+  geom_point()
+
+# dewp vs dep_delay
+flights %>% 
+  left_join(weather, by = "time_hour") %>% 
+  ggplot(aes(dewp, dep_delay)) + 
+  geom_point() + 
+  geom_smooth()
+
+
+#4 - what happened on June 13, 2013?
+# average dep_delay was 45.8 min
+# average arr_delay was 63.8 min
+flights %>% 
+  filter(year == 2013, month == 6, day == 13) %>% 
+  summarise(
+    delay = mean(dep_delay, na.rm = TRUE),
+    delayarr = mean(arr_delay, na.rm = TRUE)
+  )
+
+# 13.5 Filtering Joins
