@@ -1997,3 +1997,128 @@ flights %>%
   )
 
 # 13.5 Filtering Joins
+# how to use semi_join() and anti_join()
+
+# semi_join(x, y) keeps all observations in x that have a match in y
+# anti_join(x, y) drops all observations in x that have a match in y
+
+# returns top 10 destinations
+top_dest <- flights %>% 
+  count(dest, sort = TRUE) %>% 
+  head(10)
+# find each flight that went to one of those destinations
+flights %>% 
+  filter(dest %in% top_dest$dest)
+# gets complicated with multiple variables
+flights %>% 
+  semi_join(top_dest) # keeps observations in flights that match a dest in top_dest
+
+flights %>% 
+  anti_join(top_dest) # removes top destinations from flights dataset
+
+# anti joins useful for dianosing mismatches
+# many flights don't have a match in planes
+absent_planes <- flights %>% 
+  anti_join(planes, by = "tailnum") %>% 
+  count(tailnum, sort = TRUE) # 722 planes not in planes dataset
+
+flights %>% 
+  semi_join(absent_planes, by = "tailnum") %>%
+  count(carrier, sort = TRUE)
+
+
+#2 - Filter flights to only show flights with the planes that have flown at least 100 flights
+freq_flyers <- flights %>% 
+  count(tailnum, sort = TRUE) %>% 
+  filter(!is.na(tailnum), n >= 100)
+
+flights %>% 
+  semi_join(freq_flyers, by = "tailnum") %>% 
+  count(tailnum) %>% 
+  tail() # confirms that we are sorting out flights with fewer than 100 flights
+
+#3 - combine fueleconomy::vehicles and fueleconomy::common to fine only
+# the records for the most common models
+
+fueleconomy::vehicles
+fueleconomy::common
+
+fueleconomy::vehicles %>% 
+  semi_join(fueleconomy::common, by = c("make", "model"))
+
+#4 - ambiguous question...
+
+#5 - what does this tell you?
+flights %>% 
+  anti_join(airports, by = c("dest" = "faa")) #flights not in the faa records? International flights?
+
+# what about
+airports %>% 
+  anti_join(flights, by = c("faa" = "dest")) # airports not flown to from NYC
+
+# 13.6 Join Problems
+# How to go about making joins run smoothly
+
+# Identify variables that form the primary key.
+# Do this by understanding the data, no arbitrarily choosing randon vars
+
+# Make sure all vars in the primary key do not contian NAs
+
+# make sure all foreign keys match primary keys (can check with anti_join())
+
+
+# 13.7 Set Operations
+# not used as frequently, but can be used to break a complex file into simple pieces
+# interesct(x, y) returns observations in both x and y
+# union(x, y) returns unique observations in x and y
+# setdiff(x, y) returns observations in x, but not y
+
+df1 <- tribble(
+  ~x, ~y,
+  1, 1,
+  2, 1
+)
+
+df2 <- tribble(
+  ~x, ~y,
+  1, 1,
+  1, 2
+)
+
+intersect(df1, df2)
+
+union(df1, df2)
+
+setdiff(df1, df2)
+
+# -----------------------------------------------------------------
+# Chapter 14 - Strings
+# focus of chapter is on regular expressions
+# uses the stringr package in the tidyverse
+library(tidyverse)
+
+# 14.2 String Basics
+string1 <- "this is a string"
+string2 <- 'to include a "quote" in a string, use single quotes'
+
+# to include a single or double quote in a string, use a \ to back it up
+double_quote <- "\""
+single_quote <- '\''
+singlebackslash <- "\\"
+
+writeLines(double_quote)
+writeLines(single_quote)
+writeLines(singlebackslash)
+
+newline <- "\nplaceholder"
+tab <- "\tplaceholder"
+
+writeLines(newline)
+writeLines(tab)
+
+x <- "kyle"
+y <- "helzer"
+str_length(x) # gets length of string
+str_c(x,y) # concatenates strings together
+str_c(x,y, sep = " ") # can add a separater char
+
