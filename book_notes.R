@@ -2146,4 +2146,45 @@ str_sub(z, 3, 10) # if range extends past length, it returns as much as possible
 str_sub(z, 1, 1) <- str_to_lower(str_sub(z, 1, 1)) # somehow this works
 z
 
+# str_to_lower() makes lowercase
+# str_to_upper() makes uppercase
+# str_to_title() makes first letter uppercase
+
 # 14.2.4 Locales
+# locale is specified by the ISO 639 language code (2 or 3 letter abbrev)
+# this can affect sorting, as different alphabets sort differently
+x <- c("apple", "eggplant", "banana")
+str_sort(x) # default is english
+str_sort(x, locale = "haw") #Hawaiian
+
+# 14.2.5 Exercises
+#1 - different between paste() and paste0()
+?paste() # concatenate strings. Adds space between strings by default
+?paste0() # eqivalent to paste(..., sep = "", collapse). No space between strings
+
+#2 - sep takes the multiple values passed into str_c
+    # collapse takes in a vector
+
+#3 - 
+middle_char <- function(x){
+  mid <- floor((str_length(x)/2) + 1)
+  z <- str_sub(x, mid, mid)
+  return(z)
+}
+middle_char("abc")
+middle_char("aaaaataaaaa")
+middle_char("abc12def")
+
+#4 - what does str_wrap() do?
+?str_wrap() # Wraps strings into nicely formatted paragraphs
+# used in print statements? Useful for long strings that need to be typeset
+
+#5 - what does str_trim() do?
+?str_trim() # trims whitespace from a string. can specify the side (left, right, both)
+?str_squish() # reduces whitespace inside of a string
+?str_pad() # opposide of str_trim(). adds padding to string. Can add 
+
+str_pad(c("aaa", "bbb", "ccc"), 10, pad = "-", side = "both")
+
+# 14.3 Matching patterns with regular expressions
+
