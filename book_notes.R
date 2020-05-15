@@ -2122,3 +2122,28 @@ str_length(x) # gets length of string
 str_c(x,y) # concatenates strings together
 str_c(x,y, sep = " ") # can add a separater char
 
+# dealing with NAs
+z <- c("abc", NA) 
+str_c("|-", z, "-|") # when an NA is present, it make the whole string NA
+str_c("|-", str_replace_na(z), "-|") # this literally puts "NA" in as a string
+
+# putting in a vector to str_c returns a vector
+str_c("prefix-", c("a", "b", "c"), "-suffix")
+
+# strings with length 0 are silenty dropped
+str_c("a", "b", "c", if(FALSE) "d", "e") # drops d,
+
+# str_c() can collapse a vector of strings into one stirng
+# use collapse = to set separator
+str_c(c("a", "b", "c"), collapse = ",")
+
+# 14.2.3 Subsetting strings
+z <- c("apple", "banana", "pear")
+str_sub(z, 1, 3) # chars 1 - 3 (inclusive)
+str_sub(z, -3, -1) # negative numbers count backwards from the end
+str_sub(z, 3, 1) # if range is incorrectly entered, returns blank "" (not NA)
+str_sub(z, 3, 10) # if range extends past length, it returns as much as possible
+str_sub(z, 1, 1) <- str_to_lower(str_sub(z, 1, 1)) # somehow this works
+z
+
+# 14.2.4 Locales
