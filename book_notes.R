@@ -14,7 +14,6 @@ install.packages("maps")
 #Ubuntu execute this line for dependencies:
 #sudo apt install libcurl4-openssl-dev libssl-dev libxml2-dev
 
-library(ggplot2)
 library(tidyverse)
 library(maps)
 
@@ -2187,4 +2186,48 @@ middle_char("abc12def")
 str_pad(c("aaa", "bbb", "ccc"), 10, pad = "-", side = "both")
 
 # 14.3 Matching patterns with regular expressions
+
+# for describing patterns in strings
+
+# simples is patterns that match exact strings
+
+x <- c('apple', 'banana', 'pear')
+
+str_view(x, 'an')
+str_view(x, '.a.') # . matches any char
+# how do we represent a dot?
+dot <- '\\.'
+writeLines(dot)
+
+str_view(c('abc', 'a.c', 'bef'), 'a\\.c')
+
+# in \\. the \. will escape the . as a match-all, then the \ escapes the \ as an escape char
+
+# in \\\\ it can be broken down into (\\)(\\) with each escaping the escape to make (\)(\)
+# this then creates just \
+
+str_view('a\\b', '\\\\') # searches for \
+  
+# 14.3.2 Anchors
+
+# ^ matches the start of a string
+# $ matches the end of a string
+
+str_view(x, "^a") #matches the start of 'apple'
+
+# side note, "^>" will find the start of a fasta file (id line)
+
+str_view(x, "a$") # matches with the end of banana
+
+# use to find exact matches to a compete string
+
+x <- c('apple pie', 'apple', 'apple cake')
+str_view(x, "^apple$") # only matches apple
+
+# 14.3.2.1 Exercises
+#1 - how to match "$^$"
+
+x <- c("$^$", "$$$", "^^^", "^$^", "$", '^')
+
+str_view(x, "^\\$\\^\\$")
 
