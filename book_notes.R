@@ -2231,3 +2231,33 @@ x <- c("$^$", "$$$", "^^^", "^$^", "$", '^')
 
 str_view(x, "^\\$\\^\\$")
 
+str_detect() #returns a boolean vector for each word in the input
+str_detect(c('apple', 'banana', 'orange'), "g") # FALSE FALSE TRUE
+
+# 14.3.3 Character classes and alternatives
+
+# \d - matches any digit
+# \s - matches any whitespace
+# [abc] - matches a, b, or c
+# [^abc] - matches anything except a, b, or c
+
+# to put in a regexp, you need the escape char, so type \\d or \\s
+
+# can also use brackets [] to match something that requires an escape char
+# i.e. instead of \\. do [.]
+
+str_detect(c("abc","a/c","a.c","a*c"), "a[.]c") # F F T F
+str_detect(c("abc","a/c","a.c","a*c"), "a[*]c") # F F F T
+str_detect(c("abc","a/c","a.c","a*c"), "a[/]c") # F T F F
+
+# does not work with ] \ ^ -
+
+# useful to use parens when using mathmatical expressions
+
+str_detect(c("gray", "grey"), "gr(e|a)y") # T T
+str_detect(c('gray', 'grey'), "gr[ea]y") # T T
+
+# starts with a vowel
+str_detect(c('as','es','os','is','us','ys'), "^[aeiou]") # T T T T T F
+# only consonants
+str_detect(c('as','es','os','is','us','ys'), "^[^aeiou]") # F F F F F T
