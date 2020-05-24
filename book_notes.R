@@ -2261,3 +2261,14 @@ str_detect(c('gray', 'grey'), "gr[ea]y") # T T
 str_detect(c('as','es','os','is','us','ys'), "^[aeiou]") # T T T T T F
 # only consonants
 str_detect(c('as','es','os','is','us','ys'), "^[^aeiou]") # F F F F F T
+
+
+word_df <- tibble(
+  word = words,
+  i = seq_along(word)
+)
+
+word_df %>% 
+  filter(str_detect(word, "x$")) # words that end in x
+
+
