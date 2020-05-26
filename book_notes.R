@@ -2262,13 +2262,55 @@ str_detect(c('as','es','os','is','us','ys'), "^[aeiou]") # T T T T T F
 # only consonants
 str_detect(c('as','es','os','is','us','ys'), "^[^aeiou]") # F F F F F T
 
-
+# build df of words
 word_df <- tibble(
   word = words,
   i = seq_along(word)
 )
 
+# words that end in x
 word_df %>% 
-  filter(str_detect(word, "x$")) # words that end in x
+  filter(str_detect(word, "x$"))
 
+# there are no words in this list where q is not followed by a u
+word_df %>% 
+  filter(str_detect(word, "q[^u]"))
 
+# ends in "ing" or "ise"
+word_df %>% 
+  filter(str_detect(word, "(ing|ise)$"))
+
+# ends in "ed" but not in "eed"
+word_df %>% 
+  filter(str_detect(word, "[^e]ed$"))
+
+# ends in just "ed"
+word_df %>% 
+  filter(str_detect(word, "ed$"))
+
+# things that dont follow I before E except after C
+word_df %>% 
+  filter(str_detect(word, "cie"))
+
+# 14.3.4 Repetition
+
+# how many times a pattern matches:
+# ? - 0 or 1
+# + - 1 or more
+# * - 0 or more
+# {n} exactly n
+# {n,} n or more
+# {,m} at most m
+# {n,m} between n and m
+
+# this is useful if there is a long stretch of a certain letter you are looking for
+# for example, in DNA, a string of 20 Gs
+# would be "G{20}" instead of "GGGGGGGGGGGGGGGGGGGG"
+
+x <- "1888 is the longest year in Roman numerals: MDCCCLXXVIII"
+
+str_detect(x, "I{3}") # matches III
+
+fruit <- c("banana", "coconut", "cucumber", "jujube", "papaya", "apple")
+
+str_detect(fruit, "(..)\\1", match = TRUE) #doesn't work?
