@@ -2314,3 +2314,20 @@ str_detect(x, "I{3}") # matches III
 fruit <- c("banana", "coconut", "cucumber", "jujube", "papaya", "apple")
 
 str_detect(fruit, "(..)\\1", match = TRUE) #doesn't work?
+
+str_count() # find how many instances of the pattern occur in each word
+
+str_count(c("apple", "banana", "pear"), "a") # 1 3 1
+
+# build df of words
+word_df <- tibble(
+  word = words,
+  i = seq_along(word)
+)
+
+# used with mutate 
+word_df %>% 
+  mutate(
+    vowels = str_count(word, "[aeiou]"),
+    consonants = str_count(word, "[^aeiou]")
+  )
