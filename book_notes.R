@@ -2331,3 +2331,75 @@ word_df %>%
     vowels = str_count(word, "[aeiou]"),
     consonants = str_count(word, "[^aeiou]")
   )
+
+# 14.4.2 Extract Matches
+# this will return the actual text of a match
+
+# Harvard sentences stored in stringr::sentences
+sentences
+length(sentences) # 720 sentences
+head(sentences)
+
+# find sentences that contain a certain color
+colors <- c("red", "oragne", "yellow", "green", "blue", "purple")
+color_match <- str_c(colors, collapse = "|") # build regular expression
+has_color <- str_subset(sentences, color_match)
+matches <- str_extract(has_color, color_match) # this will only extract the first match (i.e. if two colors are in one sentence, it only returns the first)
+head(matches)
+str_extract_all(has_color, color_match) # returns all matches
+
+# 14.3.3 Grouped Matches
+
+noun <- "(a|the) ([^ ]+)"
+has_noun <- sentences %>% 
+  str_subset(noun) %>% 
+  head(10)
+has_noun %>% 
+  str_extract(noun)
+
+has_noun %>% 
+  str_match(noun)
+
+# 14.4.4 Replacing Matches
+# str_replace() and str_replace_all() replace matches with new strings
+
+x <- c("apple", "pear", "banana")
+str_replace(x, "[aeiou]", "-") # only replaces first hit
+str_replace_all(x, "[aeiou]", "-") # replaces all hits
+
+# can also perform multiple replacements
+x <- c("1 house", "2 cars", "3 people")
+str_replace_all(x, c("1" = "one", "2" = "two", "3" = "three"))
+
+# 14.4.5 Splitting
+# Use str_split() to split up a string into pieces
+
+sentences %>% 
+  head(5) %>% 
+  str_split(" ") # returns a list
+
+sentences %>% 
+  head(5) %>% 
+  str_split(" ", simplify = TRUE) # returns a matrix
+
+sentences %>% 
+  head(5) %>% 
+  str_split(" ", n = 3, simplify = TRUE) # n denotes the max number of pieces. If more are presence, they are put in the last one
+
+x <- "This is a sentence. This is another sentence."
+str_split(x, boundary("word"))
+str_split(x, boundary("character"))
+str_split(x, boundary("line")) # includes whitespace after word
+str_split(x, boundary("sentence")) # includes space after period
+
+# 14.5 Other types of patterns
+
+# the second part of all of these function calls regex()
+bananas <- c("banana", "Banana", "BANANA")
+# this
+str_detect(bananas, "banana") # T F F 
+# is the same as this
+str_detect(bananas, regex("banana")) # T F F
+
+# can use to ignore case
+str_detect(bananas, regex("banana", ignore_case = TRUE)) # T T T
