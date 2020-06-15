@@ -2434,3 +2434,77 @@ dir(pattern = "\\.Rmd$") # finds all R markdown files
 
 # stringr is built off of stringi, which is more comprehensive than stringr
 # all functions are similar, str_ vs stri_
+
+# ----------------------------------------------------------------------------
+# Chapter 15 - FACTORS
+# Factors are used to work with categorical variables which have a fixed and known set of possible values
+# Useful for when there is a limited number of variables and they need to be sorted in a certain way
+# package for factors is called forcats::
+
+# months are a good example
+x1 <- c("Dec", "Jan", "Apr", "Mar")
+x2 <- c("Dec", "Jam", "Apr", "Mar") # contains a typo
+sort(x1) # not useful
+month_levels <- c(
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+)
+
+# create a factor
+y1 <- factor(x1, levels = month_levels)
+y1
+sort(y1) # much more useful
+
+y2 <- factor(x2, levels = month_levels) # throws error? Book say it should replace typo with NA
+
+factor(x1) # if levels omitted, variable are put in alphabetical order
+
+f1 <- factor(x1, levels = unique(x1)) # makes the levels as the appear in the data
+
+# to get juts the levels use levels()
+levels(y1)
+
+# 15.3 General Social Survey
+gss_cat
+?gss_cat # sample of categorical variables from the General Social survey
+
+# When stored in a tibble, levels can't be seen so easily. One way is to use count()
+gss_cat %>% 
+  count(race) # White Black Other
+
+ggplot(gss_cat, aes(race)) + 
+  geom_bar()
+
+# Note: levels that have no values are dropped.
+# To force them to be displayed:
+
+ggplot(gss_cat, aes(race)) + 
+  geom_bar() +
+  scale_x_discrete(drop = FALSE) # "Not applicable" appears now
+
+# 15.3.1 Exercises
+# 1 - Explore the disctribution of rincome (reported income)
+gss_cat %>% 
+  count(rincome)
+
+ggplot(gss_cat, aes(rincome)) + 
+  geom_bar() + 
+  theme(
+    axis.text.x = element_text(angle = 90)
+  )
+
+ggplot(gss_cat, aes(rincome)) + 
+  geom_bar() + 
+  coord_flip() # Why so many rich people?
+
+levels(gss_cat$rincome)
+
+# 2 - What is the most common relig in this survey? What about party id?
+gss_cat %>% 
+  count(relig, sort = TRUE) # Top 3: Protestant, Cathloic, None
+
+gss_cat %>% 
+  count(partyid, sort = TRUE) # Independent
+
+gss_cat %>% 
+  count(denom, sort = TRUE)
