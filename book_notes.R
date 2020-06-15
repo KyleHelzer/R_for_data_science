@@ -2403,3 +2403,34 @@ str_detect(bananas, regex("banana")) # T F F
 
 # can use to ignore case
 str_detect(bananas, regex("banana", ignore_case = TRUE)) # T T T
+
+# in regex(), using comments = TRUE allows you to put in comments
+phone <- regex("
+               \\(?     # optional opening parens
+               (\\d{3}) # area code
+               [) -]?   # optional closing parens, space, or dash
+               (\\d{3}) # another three numbers
+               [ -]?    # optional space or dash
+               (\\d{4})  # three more numbers
+               ", comments = TRUE)
+phone
+str_match("514-791-8141", phone)
+
+# multiline = TRUE treats each new line as a new string rather than a continuation of the whole string
+# dotall = TRUE allows . to match everything including \n
+# fixed() matches exactly the specificed sequence of bytes, runs faster than regex
+  # this does have some drawbacks with non-English data, as accented letters can have two different byte codes
+
+# 14.6 Other uses of regex
+
+# built in apropos() function will search all objects available in the global env
+apropos("replace")
+
+# dir() is the list of all files in the directory.
+# It can take an argument pattern = as a regex to match file names
+dir(pattern = "\\.Rmd$") # finds all R markdown files
+
+# 14.7 stringi
+
+# stringr is built off of stringi, which is more comprehensive than stringr
+# all functions are similar, str_ vs stri_
