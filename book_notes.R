@@ -2650,3 +2650,69 @@ gss_cat %>%
   ) %>% 
   count(relig, sort = TRUE) %>% 
   print(n = Inf)
+
+gss_cat %>% 
+  mutate(partyid = fct_collapse(partyid,
+                                other = c("No answer", "Don't know", "Other party"),
+                                rep = c("Strong republican", "Not str republican"),
+                                ind = c("Ind,near rep", "Independent", "Ind,near dem"),
+                                dem = c("Not str democrat", "Strong democrat")
+  )) %>% 
+  group_by(year, partyid) %>% 
+  summarise(
+    n = n()
+  ) %>% 
+  mutate(
+    freq = n / sum(n)
+  ) %>% 
+  ggplot(aes(year, freq, color = fct_reorder2(partyid, year, freq))) + 
+  geom_line() + 
+  labs(color = "Party ID")
+
+#----------------------------------------------------------------------------------
+# Chapter 16 DATES AND TIMES
+# the package lubridate is made for working with dates and times
+# will use nycflights13 for practice
+library(tidyverse)
+library(lubridate)
+library(nycflights13)
+
+# Three types of data/time data that refers to an instant in time
+# Date - <date>
+# Time - <time>
+# Date-time - <dttm> --> these are called POSIXct elsewhere in R
+
+# Use the simplest possible type of data that works for you
+# use date instead of date-time if you can
+
+# current date
+today() # 2020-06-23 is a <date>
+now() # 2020-06-23 15:21:11 CDT is a <dttm>
+
+# 16.2.1 Making a date from a string
+# many lubridate functions to do this
+ymd("2017-01-31") # year month day
+mdy("January 31st, 2017") # month day year
+dmy("31-Jan-2017") # day month year
+
+# also can take unquoted numbers
+ymd(20170131) # returns 2017-01-31
+
+# to create a datetime, add _ and hm or hms
+ymd_hms("2017-01-31 20:11:59")
+mdy_hm("01/31/2017 08:01")
+
+# you can force the creation of a datetime by setting a timezone with tz
+ymd(20170131, tz = "UTC")
+
+# 16.2.2 Creating date from individual components
+# sometimes year, month, day, etc... will be stored as different data points in a df
+flights %>% 
+  select(year, month, day, hour, minute)
+
+# use make_date() or make_datetime() to create dates or datetimes
+flights %>% 
+  select(year, month, day, hour, minute) %>% 
+  mutate(
+    departure = make_datetime(year, month, day, hour, minute)
+  )
