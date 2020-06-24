@@ -2716,3 +2716,246 @@ flights %>%
   mutate(
     departure = make_datetime(year, month, day, hour, minute)
   )
+
+# arrival and departure times are in a slighly different format
+# make function to deal with it
+make_datetime_100 <- function(year, month, day, time){
+  make_datetime(year, month, day, time %/% 100, time %% 100) # end is hours, minutes
+}
+
+flights_dt <- flights %>% 
+  filter(!is.na(dep_time), !is.na(arr_time)) %>% 
+  mutate(
+    dep_time = make_datetime_100(year, month, day, dep_time),
+    arr_time = make_datetime_100(year, month, day, arr_time),
+    sched_dep_time = make_datetime_100(year, month, day, sched_dep_time),
+    sched_arr_time = make_datetime_100(year, month, day, sched_arr_time)
+  ) %>% 
+  select(origin, dest, ends_with("delay"), ends_with("time"))
+
+# distribution of departure times throughout the year
+flights_dt %>% 
+  ggplot(aes(dep_time)) + 
+  geom_freqpoly(binwidth = 86400) # 86400 seconds = 1 day
+
+# distribution of departure times on Jan 1nd, 2013
+flights_dt %>% 
+  filter(dep_time < ymd(20130102)) %>% 
+  ggplot(aes(dep_time)) + 
+  geom_freqpoly(binwidth = 600) # 600 seconds = 10 min
+
+# switch between datetime and date
+as_datetime(today())
+as_date(now())
+
+# seconds from Unix Epoch --> use as_datetime()
+# days from Unix Epoch --> use as_date()
+
+# 16.2.4 Exercises
+# 1 - what happens here?
+ymd(c("2010-10-10", "bananas")) # converts invalid date to NA and gives warning message
+
+# 2 - tzone in today()
+today() # 2020-06-24
+today(tzone = "GMT") # can add in timezone. Sometimes other timezones will be a day ahead
+today(tzone = "Pacific/Auckland") # the date in New Zealand is 2020-06-25
+
+# 3 - parse each with lubridate functions
+d1 <- "January 1, 2010"
+mdy(d1)
+d2 <- "2015-Mar-07"
+ymd(d2)
+d3 <- "06-Jun-2017"
+dmy(d3)
+d4 <- c("August 19 (2015)", "July 1 (2015)")
+mdy(d4)
+d5 <- "12/30/14"
+mdy(d5)
+d6 <- "6/5/2015"
+mdy(d6)
+d7 <- "1-17-90"
+mdy(d7)
+
+# 16.3 Date-time components
+# pull out individual components of a datetime
+x <- ymd_hms("2016-07-08 12:34:56")
+year(x) # 2016
+month(x) # 7
+month(x, label = TRUE) # Jul, gives month name
+mday(x) # 8, day of the month
+yday(x) # 190, day of the year
+wday(x) # 6, day of the week
+wday(x, label = TRUE) # Fri, gives day name
+
+# use wday() to see the distribution of flights on each day of the week
+flights_dt %>% 
+  mutate(
+    wday = wday(dep_time, label = TRUE)
+  ) %>% 
+  ggplot(aes(x = wday)) + 
+  geom_bar() # fewer flights depart on the weekend
+
+# look at average departure delay by minute within the hour
+# flights leaving in minutes 20-30 and 50-60 have muhc lower delays
+flights_dt %>% 
+  mutate(
+    minute = minute(dep_time)
+  ) %>% 
+  group_by(minute) %>% 
+  summarise(
+    avg_delay = mean(arr_delay, na.rm = TRUE),
+    n = n()
+  ) %>% 
+  ggplot(aes(minute, avg_delay)) + 
+  geom_line()
+
+# do same but for scheduled dep time
+# does not have the same distribution
+flights_dt %>% 
+  mutate(minute = minute(sched_dep_time)) %>% 
+  group_by(minute) %>% 
+  summarise(
+    avg_delay = mean(arr_delay, na.rm = TRUE),
+    n = n()
+  ) %>% 
+  ggplot(aes(minute, avg_delay)) + 
+  geom_line()
+
+# there is a bias for flights leaving at "nice, round times"
+# probably easier to remember for passengers
+flights_dt %>% 
+  mutate(minute = minute(sched_dep_time)) %>% 
+  group_by(minute) %>% 
+  summarise(
+    avg_delay = mean(arr_delay, na.rm = TRUE),
+    n = n()
+  ) %>% 
+  ggplot(aes(minute, n)) + 
+  geom_line()
+
+# 16.3.2 Rounding
+# There are rounding functions for times
+
+# flights per week
+flights_dt %>% 
+  count(week = floor_date(dep_time, "week")) %>% 
+  ggplot(aes(week, n)) + 
+  geom_line()
+
+# flights per day
+flights_dt %>% 
+  count(day = floor_date(dep_time, "day")) %>% 
+  ggplot(aes(day, n)) + 
+  geom_line()
+
+# 16.3.3 Setting Components
+# dates can be changed in the following way
+x <- ymd_hms("2016-07-08 12:34:56")
+year(x) <- 2020
+x # 2020-07-08 12:34:56
+month(x) <- 01
+hour(x) <- hour(x) + 1 # increments hour by 1
+x # 2020-01-08 13:34:56
+
+# also use update() to update the time
+update(x, year = 2020, month = 2, mday = 2, hour = 2) # returns a variable, does not change x
+
+# if values are too big they will rollover
+ymd("2015-02-01") %>% 
+  update(mday = 30) # 2020-03-02
+
+ymd("2015-02-01") %>% 
+  update(hour = 400) # 2015-02-17 16:00:00 UTC
+
+# use update to show distribution of flights across the day for every day of the year
+flights_dt %>% 
+  mutate(dep_hour = update(dep_time, yday = 1)) %>% 
+  ggplot(aes(dep_hour)) + 
+  geom_freqpoly(binwidth = 300)
+
+# 16.4 Time spans
+# Durations, periods, and intervals
+
+# 16.4.1 Durations
+# base R function uses this:
+age <- today() - ymd(19791014)
+age # difftime object
+
+# lubridate always uses the seconds in duration
+as.duration(age) # 128424900s
+dseconds(15) # 15s
+dminutes(10) # 600s (~10 minutes)
+dhours(c(12, 24))
+ddays(0:5)
+dweeks(3) # 1814400s
+dyears(1) # 31557600s
+
+# they can be added amd multiplied
+2 * dyears(1)
+dyears(1) + dweeks(12) + dhours(15)
+
+# add and subtract durations from days
+tomorrow <- today() + ddays(1)
+tomorrow
+last_year <- today() - dyears(1)
+last_year
+
+# be careful though. Sometimes results are unexpected due to use of seconds
+one_pm <- ymd_hms("2016-03-12 13:00:0", tz = "America/New_York")
+one_pm
+one_pm + ddays(1) # time is now 2pm. EST (standard) changed to EDT (daylight savings time)
+
+# 16.4.2 Periods
+# Periods work in "human friendly" ways
+# Duration is literally that. A duration of 1 day (in seconds)
+one_pm
+one_pm + days(1) # the next day, but at 1 pm
+
+seconds(15) # 15S
+minutes(10) # 10M 0S
+hours(12) # 12H 0M 0S
+days(7) # 7d 0H 0M 0S
+months(3) # 3m 0d 0H 0M 0S
+weeks(3) # 21d 0H 0M 0S
+years(1) # 1y 0m 0d 0H 0M 0S
+
+# add and multiple periods
+10 * (months(6) + days(1)) # 60m 10d 0H 0M 0S
+days(50) + hours(25) + minutes(2) # 50d 25H 2
+
+# add them to dates
+# leap year. dyears(1) literally adds the duration of a non-leap year
+ymd("2016-01-01") + dyears(1) # 2016-12-31 06:00:00 UTC
+ymd("2016-01-01") + years(1) # 2017-01-01
+
+# Daylight Savings Time
+one_pm + ddays(1) # 2016-03-13 14:00:00 EDT
+one_pm + days(1) # 2016-03-13 13:00:00 EDT
+
+# fix flights, some planes have arrived at the dest before departing NYC (overnight flights)
+flights_dt %>% 
+  filter(arr_time < dep_time)
+
+
+flights_dt <- flights_dt %>% 
+  mutate(
+    overnight = arr_time < dep_time,
+    arr_time = arr_time + days(overnight * 1),
+    sched_arr_time = sched_arr_time + days(overnight * 1)
+  )
+
+flights_dt %>% 
+  filter(overnight, arr_time < dep_time) # no flights in this tibble
+
+# 16.4.3 Intervals
+# what this updated recently? Not getting the same as in the book
+
+dyears(1) / ddays(1) # 365.25
+years(1) / days(1) # 365.25
+
+next_year <- today() + years(1)
+(today() %--% next_year) / ddays(1) # 365
+(today() %--% next_year) / days(1) # 365
+
+# -------------------------------PART III-----------------------------------------
+# -------------------------------PROGRAM------------------------------------------
