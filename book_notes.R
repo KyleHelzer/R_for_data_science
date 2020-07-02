@@ -2959,3 +2959,32 @@ next_year <- today() + years(1)
 
 # -------------------------------PART III-----------------------------------------
 # -------------------------------PROGRAM------------------------------------------
+
+# Chapter 17 - Intro
+# Import --> Tidy --> (Transform --> Visualize --> Model) Repeat --> Communicate
+# This section will go over:
+# Pipes
+# Functions
+# Data Scructures
+# Iteration
+
+# ---------------------Chapter 18 PIPES-------------------------------
+# 18.1 Intro
+# comes from the library magrittr, which is part of the tidyverse
+library(magrittr)
+library(tidyverse)
+
+# 18.2 Pipe alternatives
+# The pipe helps code be more readable
+# Note: only worry about memory when it becomes a problem
+# duplicating a data frame doesnt double the memory useage, R is smart than that
+
+# 18.3 When not to use a pipe
+# When pipes are long (say, 10 steps). In this instance, create intermediate objects
+# When you have multiple inputs or outputs
+# Things with complex structures
+
+# There's also the T Pipe %T>%
+# Not exaclty sure how it works
+
+# ----------------------Ch19 FUNCTIONS-----------------------------------
