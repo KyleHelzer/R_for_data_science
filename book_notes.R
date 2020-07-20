@@ -2988,3 +2988,23 @@ library(tidyverse)
 # Not exaclty sure how it works
 
 # ----------------------Ch19 FUNCTIONS-----------------------------------
+
+# Functions all for automation of common tasks, thus avoiding the cringe-inducting copy-paste
+# Advantages:
+# 1. Can give functions meaningful names
+# 2. As needs of function change, only need to update in one place
+# 3. Eliminate chance of making mistakes when copy-pasting in multiple places
+
+# Code style is important. Makes things easier to read
+
+# 19.2 When should you write a function?
+# Consider whenever you have to copy-paste code more than twice
+# Three key steps in creating a function
+# 1. pick a name for the function. Use something descriptive, but not too long
+# 2. list the arguments or inputs inside function()
+# 3. place the code inside the body of the function
+# syntax:
+
+function_name <- function(input) {
+  body
+}
