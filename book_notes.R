@@ -3007,4 +3007,182 @@ library(tidyverse)
 
 function_name <- function(input) {
   body
+  return(return_value) # fuctions don't always have to return something
 }
+
+# 19.3 Functions are for humans and computers
+# computers don't care what the function is called, but a human does
+# name should be:
+#   short
+#   clearly evoke what it does
+#   however, better to be clear than short
+#   generally names should be verbs, args nouns
+
+# too short
+f()
+# not a verb or descriptive
+my_awesome_function()
+# long but clear
+impute_missing()
+collapse_years()
+
+# different styles of separating words
+# snake_case
+# camelCase
+# BAD: alllowercase
+# doesn't matter which one, just be consistant
+
+# if you have a family of functions, keep names consistant
+# see the str_ family of functions
+
+# Good
+input_select()
+input_checkbox()
+input_text()
+
+# Not so good, but fine
+select_input()
+checkbox_input()
+text_input()
+
+# try to override existing functions and variables
+# NEVER DO THIS
+# T <- FALSE
+# c <- 10
+# mean <- function(x)
+
+# USE COMMENTS
+
+# headers can help break up code to make it more readable
+# shortcut for inserting: Ctrl + Shift + R
+
+
+# Test Section Label ------------------------------------------------------
+
+# This can be collapsed. And would have been nice to know before doing these notes
+
+
+# 19.4 Conditional Execution ----------------------------------------------
+
+# format for conditional code looks like this:
+if (condition) {
+  # code executed when TRUE
+} else {
+  # code executed when FALSE
+}
+
+# tells if each element of a vector is named
+has_name <- function(x) {
+  nms <- names(x)
+  if (is.null(nms)) {
+    rep(FALSE, length(x))
+  } else {
+    !is.na(nms) & nms != ""
+  }
+}
+
+q <- "stuff"
+has_name(q)
+
+
+# 19.4.1 Conditions -------------------------------------------------------
+
+# The condition MUST evaluate to TRUE or FALSE (boolean)
+# Otherwise you will get a warning message
+# if given a vector, the first value will be used
+
+if (c(TRUE, FALSE)) {
+  print("TRUE")
+} else {
+  print("FALSE")
+}
+
+if (NA) {}
+
+# you can use && and || to combine multiple expressions
+# as soon as || sees the first TRUE it returns TRUE
+# as soon as && sees the first FALSE it returns FALSE
+# NEVER you | or & in an if statement
+
+# be careful when using identical()
+0 == 0L # TRUE
+identical(0, 0L) # FALSE, one is int and on is double
+
+# watch out for floating point numbers
+x <- sqrt(2) ^ 2
+x # 2
+x == 2 # FALSE
+identical(x, 2) # FALSE
+x - 2 # 4.440892e-16
+dplyr::near(x, 2) # TRUE
+
+# 19.4.2 Multiple Conditions ----------------------------------------------
+
+# Multiple conditions can be chained together
+
+if (this) {
+  # do that
+} else if (that) {
+  # do something else
+} else {
+  # do other thing
+}
+
+# if you have a long chain of if statments, consider using switch
+
+switch_test <- function(x, y, op){
+  switch(op,
+         plus = x + y,
+         minus = x - y,
+         times = x * y,
+         divide = x / y,
+         stop("Unknown operation!")
+  )
+}
+
+switch_test(12, 19, "plus") # 31
+switch_test(12, 19, "minus") # -7
+switch_test(12, 19, "times") # 228
+switch_test(12, 19, "divide") # 0.6315789
+
+# 19.4.3 Code Style -------------------------------------------------------
+
+# opening { should never go in its own line and should always be followed by a newline
+# closing curly brace } should go on its own line, unless followed by else
+
+# GOOD
+if (y < 0 && debug) {
+  message("Y is negative")
+}
+
+if (y == 0) {
+  log(x)
+} else {
+  y ^ x
+}
+
+# BAD
+if (y < 0 && debug)
+message("Y is negative")
+
+if (y == 0) {
+  log(x)
+} 
+else {
+  y ^ x
+}
+
+# curly braces are technically not necessary
+# and can be dropped if a very short if statement can fit in one line
+
+y <- 10
+x <- if (y < 20) "Too low" else "Too high"
+
+# full form is easier to read
+if (y < 20) {
+  x <- "Too low"
+} else {
+  x <- "Too high"
+}
+
+ifelse()
