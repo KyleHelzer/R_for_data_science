@@ -3186,3 +3186,280 @@ if (y < 20) {
 }
 
 ifelse()
+
+# 19.4.4 Exercises --------------------------------------------------------
+
+# Impement a fizzbuzz program
+
+fizzbuzz <- function(number) {
+  if (number %% 15 == 0) {
+    print("fizzbuzz")
+  } else if (number %% 3 == 0) {
+    print("fizz")
+  } else if (number %% 5 == 0) {
+    print("buzz")
+  } else {
+    print(number)
+  }
+}
+
+fizzbuzz(3)
+fizzbuzz(5)
+fizzbuzz(15)
+fizzbuzz(4)
+fizzbuzz(30)
+
+# How to use cut() to simplify this?
+?cut
+Z <- stats::rnorm(10000)
+cut(Z, breaks = seq(-6,6, by = ))
+table(cut(Z, breaks = -6:6))
+sum(table(cut(Z, breaks = -6:6, labels = FALSE)))
+sum(graphics::hist(Z, breaks = -6:6, plot = FALSE)$counts)
+
+
+how_hot <- function(temp_list){
+  feeling <- cut(temp_list, 
+      breaks = c(-Inf, 0, 10, 20, 30, Inf), 
+      labels = c("freezing", "cold", "cool", "warm", "hot"))
+  return(feeling)
+}
+temps <- c(-34, 4, 14, 24, 34, 0, 10, 20, 30)
+how_hot(temps)
+
+# what does switch() do?
+
+require(stats)
+center <- function(x, type) {
+  switch(type,
+         mean = mean(x),
+         median = median(x),
+         trimmed = mean(x, trim = 0.1))
+}
+q <- rcauchy(10)
+q
+center(q, "mean")
+center(q, "median")
+center(q, "trimmed")
+
+# 19.5 Function Arguments -------------------------------------------------
+
+# Arguments typically fall into 2 sets
+# Suppliers of data
+# Arguments that contorl the details of the computation
+
+log() # data is x, and the details is base of the log
+log(3, base = 2) # 3 is the data, base = 2 is a detail
+
+mean() # data is x, details are data to trim, and how to handle missing vals (na.rm)
+
+t.test() # data are x and y
+         # details are `alternatie` `mu` `paired` `var.equal` `conf.level`
+str_c() # data are any number of string
+        # details of the concatenation are controlled by `sep` and `collapse`
+
+# Generally, data comes first, then details
+# Details should have default value and this value should be the most common
+# with the exeption of prioritizing safety
+# na.rm is usually set to FALSE by default, as missing values are important
+
+# for the data, don't call it by name
+# if overriding details, put in name
+
+# Good
+mean(1:10, na.rm = TRUE)
+
+# Bad
+mean(x = 1:10, , FALSE)
+mean(, TRUE, x = c(1:10, NA))
+
+# you can also refer to an argument by its unique prefix, but this is generally avoided
+# all of these work
+mean(1:10, n = TRUE)
+mean(1:10, na = TRUE)
+mean(1:10, na. = TRUE)
+mean(1:10, na.r = TRUE)
+mean(1:10, na.rm = TRUE)
+
+# some good syntax rules
+# place a space around =
+# place a space after ,
+# use whitespace to make it easier to skim function
+
+# Good
+average <- mean(feet / 12 + inches, na.rm = TRUE)
+
+# Bad
+average<-mean(feet/12+inches,na.rm=TRUE)
+
+# 19.5.1 Choosing Names ---------------------------------------------------
+
+# Names of the arguments are important
+# R doesn't care, but your readers do
+
+# make constraints explicit
+wt_mean <- function(x, w) {
+  sum(x * w) / sum(w)
+}
+
+wt_var <- function(x, w) {
+  mu <- wt_mean(x, w)
+  sum(w * (x - mu) ^ 2) / sum(w)
+}
+
+wt_sd <- function(x, w) {
+  sqrt(wt_var(x, w))
+}
+
+# What happens if x and w are not the same length
+wt_mean(1:6, 1:3)
+
+# Its good practice to check for conditions, and throw and error with stop() if they are not true
+wt_mean <- function(x, w) {
+  if (length(x) != length(w)) {
+    stop("`x` and `w` must be the same length", call. = FALSE)
+  }
+  sum(w * x) / sum(w)
+}
+
+wt_mean(1:6, 1:3) # now throws error
+
+# its very easy to get bogged down with error messages
+# don't make something overly complicated
+# use the stopifnot() function to check if an argument is TRUE
+# returns generic error message if FALSE
+
+wt_mean <- function(x, w, na.rm = FALSE) {
+  stopifnot(length(x) == length(w)) # this should be true
+  stopifnot(is.logical(na.rm), length(na.rm) == 1) # this should be true
+  
+  if (na.rm) {
+    miss <- is.na(x) | is.na(w)
+    x <- x[!miss]
+    w <- w[!miss]
+  }
+  sum(w * x) / sum(w)
+}
+wt_mean(1:6, 6:1, na.rm = "foo")
+wt_mean(1:6, 6:1, na.rm = FALSE)
+wt_mean(1:6, 1:3)
+
+# Dot Dot Dot -------------------------------------------------------------
+
+# There are a few functions that take an arbirary number of inputs
+sum(1,2,3,4,5,6,7,8,9)
+# This function works by using the ... input
+str_c("str_c", "is", "another", "example", sep = " ")
+
+commas <- function(...) str_c(..., collapse = ", ")
+commas(letters[1:10])
+
+rule <- function(..., pad = "-") {
+  title <- paste0(...)
+  width <- getOption("width") - nchar(title) - 5
+  cat(title, " ", str_dup(pad, width), "\n", sep = "")
+}
+rule("Important output")
+
+# ... does come with a price. Any misspelled arguments will not raise an error
+
+# 19.5.4 Lazy Evaluation --------------------------------------------------
+
+# Arguments are "lazy evaluated" meaning they aren't computed until they are needed
+
+# 19.6 Return Values ------------------------------------------------------
+
+# A few things to think about when deciding what to return
+# Does returning early make your function easier to read?
+# Can you make your function pipeable?
+
+# 19.6.1 Explicit Return Statements ---------------------------------------
+
+# Use return to indicate that you can return early with a simpler solution.
+# A common reason to do this is because the inputs are empty
+
+complicated_function <- function(x, y, z) {
+  if (length(x) == 0 || length(y) == 0) {
+    return(0)
+  }
+  # complicated code here
+}
+
+# If you can return early with an easier case, then do it
+# So rather than this:
+f <- function() {
+  if(x) {
+    # do
+    # something
+    # very
+    # long
+  } else {
+    # return something
+  }    
+}
+
+# Do this:
+f <- function() {
+  if(!x) {
+    return(something)
+  }
+  # put
+  # complicated
+  # code
+  # here
+}
+
+# 19.6.2 Writing Pipeable Functions ---------------------------------------
+
+# To make a function pipeable, its important to know the output type
+# This is what will be fed into the next function
+# For example, dplyr and tidyr use data frame objects
+
+# There are two basic types of pipeable functions
+# Transformations and Side Effects
+# Transformations:
+#     An object is passed to the functions first argument and a modified object is returned
+# Side-effects:
+#     The passed object is not transformed. Instead something else is generated from the input
+#     and it is returned. For example, drawing a plot or saving a file
+
+# Thie function prints the number of missing values in a data frame
+show_missing <- function(df) {
+  n <- sum(is.na(df))
+  cat("Missing values: ", n, "\n", sep = "")
+  
+  invisible(df)
+}
+show_missing(mtcars)
+# This function returns the df, its just not printed by default with invisible()
+# Because of this we can still use the pipe
+
+mtcars %>% 
+  show_missing() %>% 
+  mutate(mpg = ifelse(mpg < 20, NA, mpg)) %>% 
+  show_missing()
+
+# 19.7 Environment --------------------------------------------------------
+
+# The environment of a function controls how R finds the value associated with a name
+# Consider this function:
+f <- function(x) {
+  x + y
+}
+# Most programming languages would throw an error because y is not defined within the function
+# R uses Lexical Scoping to find the value
+# If its not defined within the function, it searches in the environment where the function was defined
+# Thus:
+rm(y) # remove y from the environment
+f(10) # y is not found
+y <- 100
+f(10) # 110
+
+# This (apparently) allows R to be very consistent.
+# Every name is looked up with the same set of rules
+# R places few limits on power. You can remap `+` if so desired (but not recommended)
+
+
+# CHAPTER 20: VECTORS -----------------------------------------------------
+
+
