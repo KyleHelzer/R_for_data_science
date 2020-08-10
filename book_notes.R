@@ -3462,4 +3462,101 @@ f(10) # 110
 
 # CHAPTER 20: VECTORS -----------------------------------------------------
 
+# 20.1 Intro and Prereqs --------------------------------------------------
+
+# So far focused on tibbles and packages that work with tibbles
+# Vectors are the objects that underlie tibbles
+
+# 20.2 Vector Basics ------------------------------------------------------
+
+# There are two types of vectors:
+# ATOMIC - logical, integer, double, character, complex, raw
+#     Integer and double = numeric vectors
+# LISTS - sometimes called recursive vectors, since lists can contain other lists
+
+# ATOMIC are homogenous, LISTS can be heterogenous 
+
+# Every vector has two properties: TYPE and LENGTH
+# TYPE can be determined with typeof()
+letters
+typeof(letters) # character
+typeof(1:10) # integer
+
+# LENGTH can be determined with length()
+y <- list("a", "b", 1:10)
+typeof(y) # list
+length(y) # 3
+
+# Augmented vectors contain attributes on top of the base vectors
+# FACTORS = built on top of integers
+# DATE and DATETIME are built on top of numeric vectors
+# DATA FRAMES and TIBBLES are built on top of lists
+
+# 20.3 Important Types of Atomic Vectors ----------------------------------
+
+# Four most important types of atomic vectors are:
+# LOGICAL INTEGER DOUBLE CHARACTER
+
+# 20.3.1 LOGICAL
+# Simplest type of atomic vector because they can take only 3 possible values:
+# FALSE | TRUE | NA
+# Logical vectors are usually constructed with comprison operators
+
+1:10 %% 3 == 0 # returns logical vector of length 10
+y <- c(TRUE, TRUE, FALSE, NA)
+typeof(y) # logical
+length(y) # 4
+
+# 20.3.2 NUMERIC
+# Contains both INTEGERS and DOUBLES
+# In R, **numbers are doubles by default**
+# To coerce to integer, place an L after the number
+typeof(1)     # double
+typeof(1.0)   # double
+typeof(1L)    # integer
+
+# Note: doubles are approximations. They represent floating point numbers
+# that cannot be precisly represented with a fixed amount of memory
+
+y <- sqrt(2) ^ 2
+y # 2
+typeof(y) # double
+y - 2 # 4.44e-16
+dplyr::near() # provides some tolerance to this
+
+# Integers have one special value: NA
+# Doubles have 4: NA, NaN, Inf, -Inf
+c(-1, 0, 1) / 0 # -Inf, NaN, Inf
+
+# Don't use == to check for Inf or NaN
+# Use is.finite(), is.infinite(), isnan()
+is.finite(0)      # TRUE
+is.infinite(Inf)  # TRUE
+is.na(NA)         # TRUE
+is.na(NaN)        # TRUE
+is.nan(NA)        # FALSE
+is.nan(NaN)       # TRUE
+
+#20.3.3 CHARACTERS
+
+# Most complex type of atomic vector
+# Already leared a lot in Strings section
+# Note: each unique string is stored only once
+y <- "This is a reasonably long string"
+library(pryr)
+object_size(y) # 152 B
+z <- rep(y, 1000)
+object_size(z) # 8.14 kB. less than 1000x the size of y. Its the size of 1000 pointers + 152
+
+# 20.3.4 Missing Values
+
+# Each atomic vector has its own missing value
+NA # LOGICAL
+NA_integer_ # INTEGER
+NA_real_ # DOUBLE
+NA_character_ # CHARACTER
+
+# normally you dont have to worry about these because they are coverted to the correct type
+# It is good to know though because of some strict functions regards their inputs
+
 
